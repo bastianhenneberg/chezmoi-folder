@@ -1,0 +1,102 @@
+Host github.com
+    User git
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 49.12.226.60
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.103.165
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.53.201
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.53.38
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.34.187.56
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.34.187.56
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.108.113
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 167.235.140.33
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 159.69.214.162
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.235.145
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 157.180.39.64 
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 91.99.17.155 
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 49.13.80.161
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 88.198.192.86
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.157.118
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 46.224.124.91
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host kiserver
+    HostName 192.168.1.147
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 192.168.1.147
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 100.97.10.160
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host codingmachine
+    HostName 100.97.97.130
+    User codingmachine
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 100.97.97.130
+    User codingmachine
+    IdentityFile ~/.ssh/arch-linux-mobile
+    
+Host 178.104.42.244
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 178.104.23.247
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
