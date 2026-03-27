@@ -16,6 +16,7 @@ input {
   # Increase sensitity for mouse/trackpack (default: 0)
   # sensitivity = 0.35
 
+{{ if eq .machine "laptop" -}}
   touchpad {
     # Use natural (inverse) scrolling
     # natural_scroll = true
@@ -26,8 +27,11 @@ input {
     # Control the speed of your scrolling
     scroll_factor = 0.4
   }
+{{ end -}}
 }
 
+{{ if eq .machine "laptop" -}}
 # Scroll faster in the terminal
 windowrule = match:class (Alacritty|kitty), scroll_touchpad 1.5
 windowrule = match:class com.mitchellh.ghostty, scroll_touchpad 0.2
+{{ end -}}
