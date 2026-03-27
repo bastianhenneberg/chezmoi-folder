@@ -1,0 +1,41 @@
+# See https://wiki.hyprland.org/Configuring/Monitors/
+# List current monitors and resolutions possible: hyprctl monitors
+# Format: monitor = [port], resolution, position, scale
+# You must relaunch Hyprland after changing any envs (use Super+Esc, then Relaunch)
+
+env = GDK_SCALE,1
+
+{{ if eq .machine "desktop" -}}
+# Desktop Setup (4 Monitore, v.l.n.r.)
+# Beyond TV (HDMI-A-1) | Samsung G7 (DP-2) | BenQ PD2700U (DP-1, Main) | BenQ ZOWIE (DP-3)
+monitor=HDMI-A-1,3840x2160@60,0x0,1
+monitor=DP-2,2560x1440@60,3840x0,1
+monitor=DP-1,3840x2160@60,6400x0,1.5
+monitor=DP-3,1920x1080@60,8960x0,1
+
+# Workspace-Zuweisung
+workspace = 1, monitor:DP-1, default:true
+workspace = 2, monitor:DP-2, default:true
+workspace = 3, monitor:HDMI-A-1, default:true
+workspace = 4, monitor:DP-1
+workspace = 5, monitor:HDMI-A-1
+workspace = 6, monitor:DP-3, default:true
+workspace = 7, monitor:DP-3
+
+{{ else if eq .machine "laptop" -}}
+# Laptop Setup
+monitor=eDP-2,2560x1440@240,0x0,1
+# HDMI Monitor Büro
+monitor=HDMI-A-1,3840x2560@50,2560x0,1
+
+# Workspace-Zuweisung
+workspace = 1, monitor:eDP-2, default:true
+workspace = 2, monitor:HDMI-A-1, default:true
+workspace = 4, monitor:HDMI-A-1
+workspace = 5, monitor:HDMI-A-1
+
+{{ else -}}
+# Fallback: auto-detect
+monitor=,preferred,auto,auto
+
+{{ end -}}
