@@ -43,9 +43,11 @@ bindd = SUPER SHIFT ALT, X, X Post, exec, omarchy-launch-webapp "https://x.com/c
 # My Bindings 
 bindd = SUPER, R, Launch apps, exec, walker -p "Start…"
 bindd = SUPER, Q, Close all Windowns, killactive
-# bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout jmnw-swoop next
+{{ if eq .machine "desktop" -}}
+bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout jmnw-swoop next
+{{ else if eq .machine "laptop" -}}
 bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout corne-view-keyboard next
-# bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout zmk-project-corne-view-keyboard next
+{{ end -}}
 
 
 
