@@ -118,3 +118,4 @@ alias reload='source ~/.zshrc'
 # Theme Reload (nach Omarchy Theme-Wechsel)
 alias tr='exec zsh'
 export PATH="$HOME/.local/bin:$PATH"
+alias anki='QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu anki'
