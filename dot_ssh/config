@@ -96,6 +96,18 @@ Host 178.104.23.247
     User forge
     IdentityFile ~/.ssh/arch-linux-mobile
 
+Host 46.225.26.43
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 178.104.193.196
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 91.99.142.104
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
 Host *
     ControlMaster auto
     ControlPath ~/.ssh/sockets/%r@%h-%p
