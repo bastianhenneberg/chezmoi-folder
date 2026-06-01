@@ -44,15 +44,7 @@ bindd = SUPER SHIFT ALT, X, X Post, exec, omarchy-launch-webapp "https://x.com/c
 # My Bindings 
 bindd = SUPER, R, Launch apps, exec, walker -p "Start…"
 bindd = SUPER, Q, Close all Windowns, killactive
-{{ if eq .machine "desktop" -}}
-bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout jmnw-swoop next
-{{ else if eq .machine "laptop" -}}
-bindd = SUPER, SPACE, Switch Keyboard Layout, exec, hyprctl switchxkblayout corne-view-keyboard next
-{{ end -}}
-
-
-
-
+bindd = SUPER, SPACE, Switch Keyboard Layout, exec, ~/.config/hypr/scripts/toggle-kb-layout.sh
 # Move focus with mainMod + arrow keys
 bindd = SUPER, H, Move focus left , movefocus, l
 bindd = SUPER, L, Move focus right ,movefocus, r
