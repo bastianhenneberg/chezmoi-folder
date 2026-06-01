@@ -1,0 +1,7 @@
+onboarding = false
+
+[ui.toast]
+delivery = "system"
+
+[keys]
+rename_workspace = "prefix+shift+s"
