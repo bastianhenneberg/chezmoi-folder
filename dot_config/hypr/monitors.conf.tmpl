@@ -3,9 +3,8 @@
 # Format: monitor = [port], resolution, position, scale
 # You must relaunch Hyprland after changing any envs (use Super+Esc, then Relaunch)
 
-env = GDK_SCALE,1
-
 {{ if eq .machine "desktop" -}}
+env = GDK_SCALE,1
 # Desktop Setup (4 Monitore, v.l.n.r.)
 # Beyond TV (HDMI-A-1) | Samsung G7 (DP-2) | BenQ PD2700U (DP-1, Main) | BenQ ZOWIE (DP-3)
 monitor=HDMI-A-1,3840x2160@60,0x0,1
@@ -23,6 +22,7 @@ workspace = 6, monitor:DP-3, default:true
 workspace = 7, monitor:DP-3
 
 {{ else if eq .machine "laptop" -}}
+env = GDK_SCALE,1
 # Laptop Setup
 monitor=eDP-2,2560x1440@240,0x0,1
 # HDMI Monitor Büro
@@ -34,7 +34,13 @@ workspace = 2, monitor:HDMI-A-1, default:true
 workspace = 4, monitor:HDMI-A-1
 workspace = 5, monitor:HDMI-A-1
 
+{{ else if eq .machine "omarchy" -}}
+# omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), HiDPI Auto-Detect
+env = GDK_SCALE,2
+monitor=,preferred,auto,auto
+
 {{ else -}}
+env = GDK_SCALE,1
 # Fallback: auto-detect
 monitor=,preferred,auto,auto
 

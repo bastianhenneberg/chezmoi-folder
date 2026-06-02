@@ -1,3 +1,9 @@
+{{ if eq .machine "omarchy" -}}
+# Extra autostart processes
+# exec-once = uwsm-app -- my-service
+#
+# exec-once = sleep 3 && rustdesk --service
+{{- else -}}
 # Extra autostart processes
 # Netzlaufwerk mounten (wartet auf Netbird + Server erreichbar)
 exec-once = bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'
@@ -19,3 +25,4 @@ exec-once = sleep 5 && uwsm app -- ghostty --title=Ghostty-WS4 -e tmux new-sessi
 
 # Workspace 2 (HDMI-A-1): Ghostty attached an tmux Session "main"
 exec-once = sleep 8 && uwsm app -- ghostty --title=Ghostty-WS2 -e tmux attach-session -t main
+{{- end -}}

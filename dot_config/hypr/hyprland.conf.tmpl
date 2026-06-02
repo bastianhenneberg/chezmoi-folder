@@ -16,6 +16,17 @@ source = ~/.config/omarchy/current/theme/hyprland.conf
 source = ~/.config/hypr/monitors.conf
 source = ~/.config/hypr/input.conf
 source = ~/.config/hypr/bindings.conf
+{{ if eq .machine "omarchy" -}}
+source = ~/.config/hypr/looknfeel.conf
+source = ~/.config/hypr/autostart.conf
+
+# Add any other personal Hyprland configuration below
+# windowrule = workspace 5, match:class qemu
+
+cursor {
+    no_hardware_cursors = true
+}
+{{- else -}}
 source = ~/.config/hypr/envs.conf
 source = ~/.config/hypr/looknfeel.conf
 source = ~/.config/hypr/autostart.conf
@@ -34,6 +45,7 @@ windowrule = workspace 4, match:class ^obsidian$
 windowrule = workspace 5, match:class ^org\.mozilla\.Thunderbird$
 windowrule = workspace 4, match:title ^Ghostty-WS4$
 windowrule = workspace 2, match:title ^Ghostty-WS2$
+{{- end }}
 
 # Toggle config flags dynamically
 source = ~/.local/state/omarchy/toggles/hypr/*.conf
