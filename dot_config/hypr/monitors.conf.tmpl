@@ -5,21 +5,20 @@
 
 {{ if eq .machine "desktop" -}}
 env = GDK_SCALE,1
-# Desktop Setup (4 Monitore, v.l.n.r.)
-# Beyond TV (HDMI-A-1) | Samsung G7 (DP-2) | BenQ PD2700U (DP-1, Main) | BenQ ZOWIE (DP-3)
-monitor=HDMI-A-1,3840x2160@60,0x0,1
-monitor=DP-2,2560x1440@60,3840x0,1
-monitor=DP-1,3840x2160@60,6400x0,1
-monitor=DP-3,1920x1080@60,10240x0,1
+# Desktop Setup (3 Monitore, v.l.n.r.)
+# Samsung LC27G7xT (DP-3) | BenQ PD2700U (DP-2, Main, 4K) | BenQ ZOWIE XL (DP-1)
+monitor=DP-3,2560x1440@240,0x0,1
+monitor=DP-2,3840x2160@60,2560x0,1
+monitor=DP-1,1920x1080@240,6400x0,1
 
 # Workspace-Zuweisung
-workspace = 1, monitor:DP-1, default:true
-workspace = 2, monitor:DP-2, default:true
-workspace = 3, monitor:HDMI-A-1, default:true
-workspace = 4, monitor:DP-1
-workspace = 5, monitor:HDMI-A-1
-workspace = 6, monitor:DP-3, default:true
-workspace = 7, monitor:DP-3
+workspace = 1, monitor:DP-2, default:true
+workspace = 2, monitor:DP-2
+workspace = 3, monitor:DP-2
+workspace = 4, monitor:DP-3, default:true
+workspace = 5, monitor:DP-3
+workspace = 6, monitor:DP-1, default:true
+workspace = 7, monitor:DP-1
 
 {{ else if eq .machine "laptop" -}}
 env = GDK_SCALE,1
