@@ -61,6 +61,30 @@ bindd = SUPER SHIFT, J, Move window down , movewindow, d
 bindd = SUPER, I, Show key bindings, exec, omarchy-menu-keybindings
 bindd = SUPER SHIFT, Z, Toggle split, layoutmsg, togglesplit
 
+# qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen
+# Toggle via Super+Alt+Q (siehe ~/.config/hypr/scripts/)
+bindd = SUPER ALT, Q, Toggle qtile-Mode, exec, ~/.config/hypr/scripts/toggle-qtile-mode.sh
+unbind = SUPER, code:10
+unbind = SUPER, code:11
+unbind = SUPER, code:12
+unbind = SUPER, code:13
+unbind = SUPER, code:14
+unbind = SUPER, code:15
+unbind = SUPER, code:16
+unbind = SUPER, code:17
+unbind = SUPER, code:18
+unbind = SUPER, code:19
+bindd = SUPER, code:10, Switch to workspace 1, exec, ~/.config/hypr/scripts/ws-switch.sh 1
+bindd = SUPER, code:11, Switch to workspace 2, exec, ~/.config/hypr/scripts/ws-switch.sh 2
+bindd = SUPER, code:12, Switch to workspace 3, exec, ~/.config/hypr/scripts/ws-switch.sh 3
+bindd = SUPER, code:13, Switch to workspace 4, exec, ~/.config/hypr/scripts/ws-switch.sh 4
+bindd = SUPER, code:14, Switch to workspace 5, exec, ~/.config/hypr/scripts/ws-switch.sh 5
+bindd = SUPER, code:15, Switch to workspace 6, exec, ~/.config/hypr/scripts/ws-switch.sh 6
+bindd = SUPER, code:16, Switch to workspace 7, exec, ~/.config/hypr/scripts/ws-switch.sh 7
+bindd = SUPER, code:17, Switch to workspace 8, exec, ~/.config/hypr/scripts/ws-switch.sh 8
+bindd = SUPER, code:18, Switch to workspace 9, exec, ~/.config/hypr/scripts/ws-switch.sh 9
+bindd = SUPER, code:19, Switch to workspace 10, exec, ~/.config/hypr/scripts/ws-switch.sh 10
+
 # Overwrite existing bindings, like putting Omarchy Menu on Super + Space
 # unbind = SUPER SHIFT, SPACE
 # bindd = SUPER SHIFT, SPACE, Omarchy menu, exec, omarchy-menu

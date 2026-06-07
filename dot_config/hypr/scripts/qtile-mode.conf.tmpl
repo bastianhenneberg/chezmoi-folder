@@ -1,0 +1,9 @@
+# qtile-Mode Pull-Ziel je Rechner.
+# MAIN_MONITOR gesetzt  -> Workspace kommt immer auf diesen Monitor.
+# MAIN_MONITOR leer     -> Workspace kommt auf den aktuell fokussierten Monitor
+#                          (klassisches qtile-Verhalten).
+{{ if eq .machine "desktop" -}}
+MAIN_MONITOR=DP-2
+{{ else -}}
+MAIN_MONITOR=
+{{ end -}}
