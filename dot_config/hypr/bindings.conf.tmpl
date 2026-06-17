@@ -19,6 +19,7 @@ bindd = SUPER, Y, Toggle workspace layout, exec, omarchy-hyprland-workspace-layo
 bindd = SUPER, RETURN, Terminal, exec, $terminal --working-directory $(omarchy-cmd-terminal-cwd)
 bindd = SUPER SHIFT, RETURN, Browser, exec, omarchy-launch-browser
 bindd = SUPER SHIFT, F, File manager, exec, uwsm app -- nautilus --new-window
+bindd = SUPER SHIFT, E, File explorer (yazi), exec, uwsm app -- ghostty --working-directory=$(omarchy-cmd-terminal-cwd) -e yazi
 bindd = SUPER SHIFT, B, Browser, exec, $browser
 bindd = SUPER SHIFT ALT, B, Browser (private), exec, $browser --private
 bindd = SUPER SHIFT, M, Music, exec, omarchy-launch-or-focus spotify

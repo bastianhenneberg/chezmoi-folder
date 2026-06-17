@@ -119,3 +119,14 @@ alias reload='source ~/.zshrc'
 alias tr='exec zsh'
 export PATH="$HOME/.local/bin:$PATH"
 alias anki='QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu anki'
+
+# yazi: `y` öffnet den File-Manager und wechselt beim Beenden (q) ins
+# zuletzt besuchte Verzeichnis. Bildvorschau braucht ein Graphics-fähiges
+# Terminal (Ghostty/Kitty) — siehe SUPER+SHIFT+E Keybind für Ghostty.
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}

@@ -1,0 +1,10 @@
+# Yazi — keymap. Only adds to the defaults via prepend_keymap. Managed via chezmoi.
+# Docs: https://yazi-rs.github.io/docs/configuration/keymap
+
+[mgr]
+prepend_keymap = [
+  # Drop into a shell in the current directory; Yazi resumes when it exits
+  { on = "!", run = 'shell "$SHELL" --block', desc = "Open shell here" },
+  # Copy absolute path(s) of selected/hovered file(s) to the Wayland clipboard
+  { on = "<C-y>", run = 'shell -- printf "%s\n" "$@" | wl-copy', desc = "Copy path(s) to clipboard" },
+]
