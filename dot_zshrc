@@ -108,6 +108,11 @@ eval "$(zoxide init zsh)"
 
 export PATH="$HOME/.config/composer/vendor/bin:$PATH"
 
+# Rust/Cargo: global installierte Binaries (cargo install --path .)
+export PATH="$HOME/.cargo/bin:$PATH"
+# Peppermint TUI: pull + neu bauen/installieren in einem Rutsch
+alias ptui-update='git -C ~/Development/peppermint-tui pull && cargo install --path ~/Development/peppermint-tui --force'
+
 # Android SDK (von Android Studio)
 export ANDROID_HOME=$HOME/Android/Sdk
 export ANDROID_SDK_ROOT=$HOME/Android/Sdk
