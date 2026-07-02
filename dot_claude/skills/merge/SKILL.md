@@ -7,38 +7,15 @@ description: Feature-Branch mergen, dokumentieren und aufräumen
 
 Wenn dieser Skill aufgerufen wird, führe folgende Schritte aus:
 
-## 1. Session Memory dokumentieren
+## 1. Session dokumentieren
 
-Falls `.claude/session-memory/` existiert:
-- Datei für heute erstellen/aktualisieren: `.claude/session-memory/YYYY-MM-DD.md`
-- Alle Änderungen der Session dokumentieren
-- Format siehe bestehende Session-Memory-Dateien
-
-Falls kein Session Memory existiert, erstelle es nach diesem Format:
-
-```markdown
-# Session YYYY-MM-DD
-
-## Zusammenfassung
-
-Kurze Beschreibung was in dieser Session gemacht wurde.
-
-## Änderungen
-
-### Bereich 1
-- Änderung 1
-- Änderung 2
-
-## Wichtige Erkenntnisse
-
-- Erkenntnis 1
-- Erkenntnis 2
-```
+Die Session-Dokumentation läuft ausschließlich über **AI Brain** (siehe `/dokumentation`).
+Lege **keine** lokalen Session-Memory-Dateien an (`.claude/session-memory/` wird nicht mehr genutzt).
 
 ## 2. Aufgaben checken
 
-- Offene Aufgaben in Session Memory oder TODO-Dateien durchgehen
-- Erledigte Aufgaben als erledigt markieren (`[x]`)
+- Offene Aufgaben (AI-Brain-Tasks) durchgehen
+- Erledigte Tasks als erledigt markieren (`complete-task-tool`)
 - Verifizieren dass alle geplanten Änderungen umgesetzt wurden
 
 ## 3. Uncommitted Changes committen
