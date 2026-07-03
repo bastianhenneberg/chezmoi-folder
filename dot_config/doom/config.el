@@ -61,6 +61,16 @@
                                 :location ,(expand-file-name "~/.local/lib/node_modules/@vue/typescript-plugin")
                                 :languages ["vue"])])))))
 
+;; --- tree-sitter-Grammatiken auffindbar machen -----------------------------
+;; Doom biegt `user-emacs-directory` zur Laufzeit auf ein Profil-Cache-Dir um,
+;; deshalb durchsucht treesit NICHT ~/.config/emacs/tree-sitter (wo die selbst
+;; gebauten Grammatiken javascript/jsdoc/typescript/tsx liegen) -> js-ts-mode &
+;; Co. melden "grammar missing" und fallen zurück. Fix: den Pfad explizit auf
+;; treesit-extra-load-path (den durchsucht treesit unabhängig von obigem).
+(after! treesit
+  (add-to-list 'treesit-extra-load-path
+               (expand-file-name "~/.config/emacs/tree-sitter")))
+
 ;; --- Maus im Terminal aktivieren -------------------------------------------
 ;; GUI-Emacs hat native Maus; im Terminal (emacs -nw) ist sie per Default AUS.
 ;; xterm-mouse-mode schaltet Klick/Region/Wheel im TTY frei (No-op im GUI).
