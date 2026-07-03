@@ -61,6 +61,11 @@
                                 :location ,(expand-file-name "~/.local/lib/node_modules/@vue/typescript-plugin")
                                 :languages ["vue"])])))))
 
+;; --- Maus im Terminal aktivieren -------------------------------------------
+;; GUI-Emacs hat native Maus; im Terminal (emacs -nw) ist sie per Default AUS.
+;; xterm-mouse-mode schaltet Klick/Region/Wheel im TTY frei (No-op im GUI).
+(xterm-mouse-mode 1)
+
 ;; --- Org --------------------------------------------------------------------
 (setq org-directory "~/org/")
 
