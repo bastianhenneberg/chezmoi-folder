@@ -71,10 +71,27 @@
   (add-to-list 'treesit-extra-load-path
                (expand-file-name "~/.config/emacs/tree-sitter")))
 
-;; --- Maus im Terminal aktivieren -------------------------------------------
-;; GUI-Emacs hat native Maus; im Terminal (emacs -nw) ist sie per Default AUS.
-;; xterm-mouse-mode schaltet Klick/Region/Wheel im TTY frei (No-op im GUI).
-(xterm-mouse-mode 1)
+;; --- Maus -------------------------------------------------------------------
+;; GUI-Emacs (pgtk) klickt/scrollt nativ. Im Terminal (emacs -nw) ist die Maus
+;; per Default AUS -> dort xterm-mouse-mode.
+(unless (display-graphic-p)
+  (xterm-mouse-mode 1))
+;; Rechtsklick -> Kontextmenü (Kopieren/Einfügen/…) und Markieren mit der Maus
+;; kopiert direkt in die Zwischenablage (das fehlt in Emacs per Default).
+(context-menu-mode 1)
+(setq mouse-drag-copy-region t)
+
+;; --- Claude Code IDE-Integration -------------------------------------------
+;; Läuft in einem vterm-Seitenfenster und verbindet via MCP mit Emacs:
+;; Claude bekommt xref (Referenzen), eglot/flymake-Diagnostics und deine
+;; aktuelle Selektion. `claude` wird über ~/.local/bin gefunden (PATH-Fix oben).
+;; Einstieg: 'SPC o c' (Menü) oder 'M-x claude-code-ide'.
+(use-package! claude-code-ide
+  :defer t
+  :init
+  (map! :leader :desc "Claude Code" "o c" #'claude-code-ide-menu)
+  :config
+  (claude-code-ide-emacs-tools-setup))
 
 ;; --- Org --------------------------------------------------------------------
 (setq org-directory "~/org/")
