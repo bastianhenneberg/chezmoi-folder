@@ -32,18 +32,21 @@ sudo tee "$BIN" >/dev/null <<'PYEOF'
 # und setzt den Patch neu, den das Update ueberschrieben hat. Kein sudo/kein --user hier.
 import os, re, sys
 
-TARGET = "/usr/lib/hyprwhspr/lib/src/whisper_manager.py"
+# Mehrere Kandidaten, weil hyprwhspr die Allokation verschiebt: bis 1.3x stand sie in
+# whisper_manager.py, seit 1.38 in backends/faster_whisper_backend.py. Ein fest
+# verdrahteter Pfad laesst den Patcher stumm ins Leere laufen - er meldet dann
+# "Ziel-Zeile nicht gefunden", der Hook gilt als installiert, und der OOM-Bug ist
+# trotzdem wieder da. Genau so vorgefunden am 07.08.2026 unter 1.38.2.
+KANDIDATEN = [
+    "/usr/lib/hyprwhspr/lib/src/backends/faster_whisper_backend.py",
+    "/usr/lib/hyprwhspr/lib/src/whisper_manager.py",
+]
 MARKER = "hyprwhspr-oom-fix"
 
-if not os.path.isfile(TARGET):
-    print("[hyprwhspr-oom-fix] Ziel nicht gefunden - hyprwhspr entfernt? Ueberspringe.")
-    sys.exit(0)
+ZIELE = [p for p in KANDIDATEN if os.path.isfile(p)]
 
-with open(TARGET, encoding="utf-8") as f:
-    src = f.read()
-
-if MARKER in src:
-    print("[hyprwhspr-oom-fix] Patch bereits aktiv.")
+if not ZIELE:
+    print("[hyprwhspr-oom-fix] Keine bekannte Ziel-Datei - hyprwhspr entfernt? Ueberspringe.")
     sys.exit(0)
 
 # Trifft BEIDE Allokations-Stellen (Erst-Load + Idle-Reinit) - beide identische Zeile.
@@ -60,15 +63,35 @@ def repl(m):
             f'{ind}import gc as _gc; _gc.collect()\n'
             f'{ind}self._faster_whisper_model = WhisperModel(model_name, device=device, compute_type=compute_type)')
 
-new, n = pat.subn(repl, src)
-if n == 0:
-    sys.stderr.write("[hyprwhspr-oom-fix] WARN: Ziel-Zeile nicht gefunden - "
-                     "hyprwhspr-Quellcode hat sich geaendert. NICHT gepatcht, bitte pruefen.\n")
-    sys.exit(0)  # nicht hart failen: Dienst laeuft (nur ohne Fix) weiter
+gesamt = 0
 
-with open(TARGET, "w", encoding="utf-8") as f:
-    f.write(new)
-print(f"[hyprwhspr-oom-fix] {n} Stelle(n) gepatcht.")
+for ziel in ZIELE:
+    with open(ziel, encoding="utf-8") as f:
+        src = f.read()
+
+    if MARKER in src:
+        print(f"[hyprwhspr-oom-fix] Patch bereits aktiv: {ziel}")
+        gesamt += 1
+        continue
+
+    new, n = pat.subn(repl, src)
+
+    if n == 0:
+        continue
+
+    with open(ziel, "w", encoding="utf-8") as f:
+        f.write(new)
+
+    print(f"[hyprwhspr-oom-fix] {n} Stelle(n) gepatcht: {ziel}")
+    gesamt += n
+
+if gesamt == 0:
+    sys.stderr.write("[hyprwhspr-oom-fix] WARN: Ziel-Zeile in keiner bekannten Datei gefunden - "
+                     "hyprwhspr-Quellcode hat sich geaendert. NICHT gepatcht, bitte pruefen.\n")
+
+# Bewusst nie hart failen: Der Dienst laeuft auch ungepatcht, nur mit dem OOM-Risiko.
+# Ein pacman-Hook, der die Transaktion abbricht, waere die schlechtere Wahl.
+sys.exit(0)
 PYEOF
 sudo chmod 755 "$BIN"
 
