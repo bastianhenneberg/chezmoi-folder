@@ -116,7 +116,11 @@ echo "[hyprwhspr-hook] Wende Patch jetzt einmal an ..."
 sudo "$BIN"
 
 echo "[hyprwhspr-hook] Starte hyprwhspr neu (falls User-Session vorhanden) ..."
-systemctl --user restart hyprwhspr.service 2>/dev/null \
-    || echo "[hyprwhspr-hook] --user Neustart uebersprungen (kein User-Bus)."
+if systemctl --user is-active --quiet hyprwhspr.service 2>/dev/null; then
+    systemctl --user restart hyprwhspr.service 2>/dev/null \
+        || echo "[hyprwhspr-hook] --user Neustart uebersprungen (kein User-Bus)."
+else
+    echo "[hyprwhspr-hook] Dienst laeuft hier nicht - kein Neustart."
+fi
 
 echo "[hyprwhspr-hook] Fertig. Kuenftige hyprwhspr-Updates patchen sich selbst."

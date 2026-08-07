@@ -45,5 +45,9 @@ raise SystemExit(0 if n > 0 else 1)
 PY
 
 echo "[hyprwhspr] Starte Dienst neu ..."
-systemctl --user restart hyprwhspr.service 2>/dev/null || echo "[hyprwhspr] Dienst-Neustart übersprungen (läuft evtl. nicht als user-service)."
+if systemctl --user is-active --quiet hyprwhspr.service 2>/dev/null; then
+    systemctl --user restart hyprwhspr.service 2>/dev/null || echo "[hyprwhspr] Dienst-Neustart übersprungen (kein User-Bus)."
+else
+    echo "[hyprwhspr] Dienst läuft hier nicht - kein Neustart."
+fi
 echo "[hyprwhspr] Fertig. Bei VRAM-Knappheit in config.json faster_whisper_model auf 'large-v3-turbo' setzen."

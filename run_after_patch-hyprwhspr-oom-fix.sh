@@ -35,8 +35,12 @@ sudo "$PATCHER"
 # eine Modell-Ladezeit und bringt nichts.
 if sudo grep -rqs "hyprwhspr-oom-fix" /usr/lib/hyprwhspr/lib/src/; then
     echo "[hyprwhspr-patch] Starte Dienst neu ..."
-    systemctl --user restart hyprwhspr.service 2>/dev/null \
-        || echo "[hyprwhspr-patch] Dienst-Neustart uebersprungen (kein User-Bus)."
+    if systemctl --user is-active --quiet hyprwhspr.service 2>/dev/null; then
+        systemctl --user restart hyprwhspr.service 2>/dev/null \
+            || echo "[hyprwhspr-patch] Dienst-Neustart uebersprungen (kein User-Bus)."
+    else
+        echo "[hyprwhspr-patch] Dienst laeuft hier nicht - kein Neustart."
+    fi
     echo "[hyprwhspr-patch] Fertig."
 else
     echo "[hyprwhspr-patch] WARNUNG: Patch nicht aktiv - hyprwhspr-Quellcode pruefen."
