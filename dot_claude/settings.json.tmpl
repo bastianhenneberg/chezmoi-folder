@@ -1,32 +1,102 @@
 {{ if eq .machine "omarchy" -}}
 {
   "hooks": {
-    "SessionStart": [
+    "PermissionRequest": [
       {
+        "matcher": "*",
         "hooks": [
           {
-            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' blocked",
+            "timeout": 10
           }
-        ],
-        "matcher": "*"
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' working",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/no-host-dev-server.sh'",
+            "timeout": 10,
+            "statusMessage": "Pruefe auf Host-Dev-Server..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' release",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' idle",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' idle",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/herdr-agent-state.sh' working",
+            "timeout": 10
+          }
+        ]
       }
     ]
   },
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
   "mcpServers": {
     "ai-brain": {
+      "type": "stdio",
+      "command": "/usr/local/bin/ai-brain-companion",
       "args": [
-        "artisan",
-        "mcp:start",
-        "brain"
-      ],
-      "command": "php",
-      "cwd": "{{ .chezmoi.homeDir }}/Development/ai-brain",
-      "type": "stdio"
+        "mcp"
+      ]
     }
-  },
-  "skipDangerousModePermissionPrompt": true
+  }
 }
 {{- else -}}
 {

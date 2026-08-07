@@ -101,6 +101,19 @@ Host 178.104.23.247
     ControlMaster auto
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 300
+
+Host datenserver truenas-daten 192.168.1.218
+    HostName 192.168.1.218
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+# infra-monitor Server-Alias (fail2ban-Jail aktiv -> nicht pro Befehl neu verbinden!)
+Host jitsi-meet
+    HostName 178.104.42.244
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
 {{- else -}}
 Host github.com
     User git

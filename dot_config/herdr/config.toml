@@ -5,3 +5,6 @@ delivery = "system"
 
 [keys]
 rename_workspace = "prefix+shift+s"
+
+[ui.sound]
+enabled = false
