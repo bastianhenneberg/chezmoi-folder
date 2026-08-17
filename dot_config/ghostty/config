@@ -95,3 +95,10 @@ mouse-scroll-multiplier = 0.95
 
 # Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
 async-backend = epoll
+
+# Shift+Ziehen markiert IMMER Text, auch wenn ein TUI die Maus anfordert.
+# Der Standard "false" laesst das Programm dies per XTSHIFTESCAPE aushebeln --
+# genau das tut Claude Code, weshalb Shift+Ziehen dort wirkungslos war.
+# "never" nimmt dem Programm diese Moeglichkeit. Normale Mausbedienung in TUIs
+# (Klicken in lazygit, Scrollen in htop) bleibt unveraendert erhalten.
+mouse-shift-capture = never
