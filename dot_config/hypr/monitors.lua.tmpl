@@ -1,0 +1,52 @@
+-- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- List current monitors and supported resolutions with: hyprctl monitors all
+--
+-- Ab Omarchy 4 ("quattro") konfiguriert Hyprland in Lua. Die alte
+-- monitors.conf wird nicht mehr gelesen.
+
+{{ if eq .machine "desktop" -}}
+hl.env("GDK_SCALE", "1")
+
+-- Fallback für unbekannte Ausgänge (wird von den Regeln unten überschrieben).
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+
+-- Desktop-Setup (3 Monitore, v.l.n.r.)
+-- Samsung LC27G7xT (DP-3) | BenQ PD2700U (DP-2, Main, 4K) | BenQ ZOWIE XL (DP-1)
+hl.monitor({ output = "DP-3", mode = "2560x1440@240", position = "0x0", scale = 1 })
+hl.monitor({ output = "DP-2", mode = "3840x2160@60", position = "2560x0", scale = 1 })
+hl.monitor({ output = "DP-1", mode = "1920x1080@240", position = "6400x0", scale = 1 })
+
+-- Workspace-Zuweisung (1 = links Samsung, 2/4/5+ = Mitte BenQ, 3 = rechts ZOWIE)
+hl.workspace_rule({ workspace = "1", monitor = "DP-3", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "DP-2", default = true })
+hl.workspace_rule({ workspace = "3", monitor = "DP-1", default = true })
+
+-- Alle weiteren Workspaces (4-10) ebenfalls auf dem mittleren Monitor.
+for ws = 4, 10 do
+  hl.workspace_rule({ workspace = tostring(ws), monitor = "DP-2" })
+end
+{{- else if eq .machine "laptop" -}}
+hl.env("GDK_SCALE", "1")
+
+-- Fallback für unbekannte Ausgänge (wird von den Regeln unten überschrieben).
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+
+-- Laptop-Setup
+hl.monitor({ output = "eDP-2", mode = "2560x1440@240", position = "0x0", scale = 1 })
+-- HDMI-Monitor Büro
+hl.monitor({ output = "HDMI-A-1", mode = "3840x2560@50", position = "2560x0", scale = 1 })
+
+-- Workspace-Zuweisung
+hl.workspace_rule({ workspace = "1", monitor = "eDP-2", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1", default = true })
+hl.workspace_rule({ workspace = "4", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
+{{- else if eq .machine "omarchy" -}}
+-- omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), HiDPI Auto-Detect
+hl.env("GDK_SCALE", "2")
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+{{- else -}}
+-- Fallback: auto-detect
+hl.env("GDK_SCALE", "1")
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+{{- end }}

@@ -1,0 +1,43 @@
+-- Extra autostart processes.
+
+{{ if eq .machine "desktop" -}}
+-- Netzlaufwerk mounten (wartet auf Netbird + Server erreichbar)
+o.exec_on_start(
+  "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
+)
+
+-- Workspaces vorbereiten, damit die Fenster ihre Zielplätze finden
+o.exec_on_start("sleep 1 && hyprctl dispatch workspace 2 && hyprctl dispatch workspace 4 && hyprctl dispatch workspace 1")
+
+-- Workspace 1 (DP-3, links): Chrome
+o.exec_on_start("sleep 2 && uwsm app -- google-chrome-stable")
+
+-- Workspace 2 (DP-2, Mitte): Ghostty
+o.exec_on_start("sleep 4 && uwsm app -- ghostty --title=Ghostty-WS2")
+
+-- Workspace 4 (DP-2, Mitte): Ghostty
+o.exec_on_start("sleep 6 && uwsm app -- ghostty --title=Ghostty-WS4")
+{{- else if eq .machine "laptop" -}}
+-- Netzlaufwerk mounten (wartet auf Netbird + Server erreichbar)
+o.exec_on_start(
+  "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
+)
+
+-- Workspaces auf externem Monitor erstellen
+o.exec_on_start("sleep 1 && hyprctl dispatch workspace 2 && hyprctl dispatch workspace 4 && hyprctl dispatch workspace 5")
+
+-- Workspace 1 (eDP-2): Zen Browser
+o.exec_on_start("sleep 2 && uwsm app -- zen-browser")
+
+-- Workspace 5 (HDMI-A-1): Thunderbird
+o.exec_on_start("sleep 3 && uwsm app -- thunderbird")
+
+-- Workspace 4 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
+o.exec_on_start("sleep 5 && uwsm app -- ghostty --title=Ghostty-WS4")
+
+-- Workspace 2 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
+o.exec_on_start("sleep 8 && uwsm app -- ghostty --title=Ghostty-WS2")
+{{- else -}}
+-- Nichts automatisch starten.
+-- o.launch_on_start("my-service")
+{{- end }}
