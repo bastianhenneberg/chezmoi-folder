@@ -1,0 +1,82 @@
+#!/bin/bash
+# Stellt das Mikrofon am ALC285 in der Reihenfolge wieder her, die funktioniert.
+#
+# Hintergrund: Am ALC285 sind PipeWire-Lautstaerke und ALSA-Hardware-Gain
+# gekoppelt. Ein "wpctl set-volume ... 1.0" reisst Capture UND Mic Boost auf
+# +30 dB = +60 dB gesamt und uebersteuert schon das Raumrauschen. Deshalb
+# ZUERST die PipeWire-Lautstaerke setzen, DANN den ALSA-Gain - nie umgekehrt.
+#
+#   mic-fix            internes Mikro (Standard, Default-Source funktioniert)
+#   mic-fix --headset  Headset-Mic erzwingen (siehe Warnung unten)
+set -u
+
+SRC=$(pactl get-default-source 2>/dev/null)
+case "$SRC" in
+    *analog-stereo) ;;
+    *) SRC=$(pactl list short sources | grep -m1 "alsa_input.*analog-stereo" | cut -f2) ;;
+esac
+[ -z "${SRC:-}" ] && { echo "Keine analoge Aufnahmequelle gefunden."; exit 1; }
+
+CARD=$(cat /proc/asound/cards | grep -B1 -i "generic" | grep -oE "^ *[0-9]+" | tail -1 | tr -d ' ')
+for c in $(seq 0 3); do
+    grep -qs ALC285 "/proc/asound/card$c/codec#0" && CARD=$c && break
+done
+
+# Ist der Headset-Port von der Jack-Erkennung als verfuegbar gemeldet?
+HS_AVAIL=no
+pactl list cards | grep -E "^\s+analog-input-mic:" | grep -qv "not available" && HS_AVAIL=yes
+
+if [ "${1:-}" = "--internal" ]; then
+    PORT=analog-input-internal-mic; BOOST='Internal Mic Boost'
+elif [ "$HS_AVAIL" = yes ]; then
+    PORT=analog-input-mic; BOOST='Mic Boost'
+    echo "Headset-Mic ist verfuegbar - wird verwendet."
+elif [ "${1:-}" = "--headset" ]; then
+    PORT=analog-input-mic; BOOST='Mic Boost'
+    echo "!! Headset-Port ist NICHT als verfuegbar gemeldet und wird erzwungen."
+    echo "!! Solange das so ist, meldet WirePlumber die Node nicht als Default-Source."
+    echo "!! Apps muessen das Geraet dann EXPLIZIT auswaehlen - 'Standard' liefert nichts."
+    echo "!! Besser: Klinke einmal aus- und wieder einstecken, das loest die"
+    echo "!! Jack-Erkennung neu aus und macht den Port regulaer verfuegbar."
+else
+    PORT=analog-input-internal-mic; BOOST='Internal Mic Boost'
+    echo "Headset-Mic nicht verfuegbar - internes Mikro. (Klinke neu einstecken hilft oft.)"
+fi
+
+echo "Karte $CARD, Port $PORT"
+
+pactl set-source-port "$SRC" "$PORT" 2>/dev/null
+pactl set-source-mute "$SRC" 0
+sleep 0.5
+
+# 1. PipeWire zuerst - danach nicht mehr anfassen
+pactl set-source-volume "$SRC" 80%
+sleep 1
+
+# 2. Dann Hardware-Gain: volle Vorverstaerkung, aber Boost aus
+amixer -c "$CARD" sset Capture 100% >/dev/null 2>&1
+amixer -c "$CARD" sset "$BOOST" 0 >/dev/null 2>&1
+sleep 0.5
+
+echo
+amixer -c "$CARD" sget Capture   | grep -m1 "Front Left:" | sed 's/^ */Capture: /'
+amixer -c "$CARD" sget "$BOOST"  | grep -m1 "Front Left:" | sed "s/^ */$BOOST: /"
+pactl list sources | sed -n "/Name: $SRC/,/Formats/p" | grep -E "Mute:|Active Port:" | sed 's/^\t/  /'
+
+# 3. Gegenmessung: Ruhepegel darf nicht in die Begrenzung laufen
+TMP=$(mktemp -d)
+# Ueber PipeWire - arecord scheitert, sobald PipeWire die Karte offen haelt.
+timeout -s INT 3 pw-record --target "$SRC" "$TMP/n.wav" 2>/dev/null
+[ -s "$TMP/n.wav" ] || { echo "(Gegenmessung uebersprungen - Aufnahme fehlgeschlagen)"; rm -rf "$TMP"; exit 0; }
+python3 - "$TMP/n.wav" <<'PY'
+import wave, array, math, sys
+w = wave.open(sys.argv[1]); a = array.array('h'); a.frombytes(w.readframes(w.getnframes()))
+a = a[48000*2:]                                  # Einschalt-Knacks weg
+r = math.sqrt(sum(x*x for x in a)/len(a)); clip = sum(1 for x in a if abs(x) > 32000)
+n = 20*math.log10(max(r,1)/32768)
+print(f"\nRuhepegel {n:.1f} dBFS, uebersteuert {clip}")
+if clip > 100:  print("=> ZU LAUT, Gain runter.")
+elif n > -20:   print("=> Rauschboden hoch - laute Umgebung oder Gain zu hoch.")
+else:           print("=> Pegel ok. Mikrofonregler jetzt NICHT mehr anfassen.")
+PY
+rm -rf "$TMP"

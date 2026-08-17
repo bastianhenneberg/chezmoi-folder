@@ -1,0 +1,63 @@
+#!/bin/bash
+# Prueft, ob am aktiven Mikrofon tatsaechlich SPRACHE ankommt - nicht nur Pegel.
+#
+# Entscheidend ist die Silbenmodulation (Streuung/Mittel der 100-ms-Huellkurve):
+#   Sprache  ~ 2.7      Rauschen ~ 0.3
+# Peak- und Clip-Werte taeuschen, weil jeder Capture-Stream mit einem ~18 ms
+# Knacks auf Vollausschlag startet - deshalb wird die erste Sekunde verworfen.
+set -u
+
+for c in $(seq 0 3); do
+    grep -qs ALC285 "/proc/asound/card$c/codec#0" && CARD=$c && break
+done
+CARD=${CARD:-2}
+SECS=${1:-8}
+
+echo "Karte $CARD | Gain: $(amixer -c "$CARD" sget Capture | grep -m1 -o '\[[0-9]*%\] \[[-0-9.]*dB\]')"
+echo "Port: $(pactl list sources | grep -A40 'alsa_input.*analog-stereo' | grep -m1 'Active Port' | cut -d: -f2)"
+echo
+echo "Gleich $SECS Sekunden am Stueck sprechen - laut von 21 aufwaerts zaehlen."
+for i in 3 2 1; do echo "   $i ..."; sleep 1; done
+echo "   >>> LOS <<<"
+
+TMP=$(mktemp -d)
+# Ueber PipeWire aufnehmen - arecord scheitert mit "Device or resource busy",
+# sobald PipeWire die Karte offen haelt. Der Pfad ist messtechnisch gleichwertig.
+SRC=$(pactl list short sources | grep -m1 "alsa_input.*analog-stereo" | cut -f2)
+timeout -s INT "$SECS" pw-record --target "$SRC" "$TMP/t.wav" 2>/dev/null &
+REC=$!
+for i in $(seq "$SECS" -1 1); do printf "\r   noch %2d s " "$i"; sleep 1; done
+wait $REC 2>/dev/null
+printf "\r   fertig.    \n\n"
+[ -s "$TMP/t.wav" ] || { echo "Aufnahme fehlgeschlagen (Quelle: ${SRC:-keine})"; rm -rf "$TMP"; exit 1; }
+
+python3 - "$TMP/t.wav" <<'PY'
+import wave, array, math, sys
+w = wave.open(sys.argv[1])
+a = array.array('h'); a.frombytes(w.readframes(w.getnframes()))
+sr, ch = w.getframerate(), w.getnchannels()
+m = [(a[i]+a[i+1])/2 for i in range(0, len(a)-1, ch)][sr:]   # 1. Sekunde weg
+def db(v): return 20*math.log10(max(v,1)/32768)
+step = sr//10
+env = [math.sqrt(sum(x*x for x in m[i:i+step])/step) for i in range(0, len(m)-step, step)]
+line = "".join('#' if db(v) > -25 else 'o' if db(v) > -40 else '.' for v in env)
+print("Verlauf (100 ms je Zeichen):")
+for i in range(0, len(line), 60): print("  " + line[i:i+60])
+s = sorted(env); lo, hi = s[len(s)//10], s[-len(s)//10]
+mean = sum(env)/len(env); mod = math.sqrt(sum((e-mean)**2 for e in env)/len(env))/mean
+snr = db(hi)-db(lo)
+print(f"\nSprache {db(hi):6.1f} dBFS | Ruhe {db(lo):6.1f} dBFS | Abstand {snr:5.1f} dB")
+print(f"Silbenmodulation {mod:.2f}   (Sprache >1.0, Rauschen <0.5)\n")
+# Rauschen erkennt man an BEIDEM: kaum Modulation UND kaum Nutzabstand.
+# Durchgehendes Zaehlen drueckt die Modulation (wenig Pausen), deshalb reicht
+# ein hoher Nutzabstand als Nachweis fuer Sprache aus.
+if mod < 0.6 and snr < 15:
+    print("=> KEINE SPRACHE. Das Mikrofon liefert nur Rauschen.")
+    print("   Pruefen: Stummschaltung am Headset, Klinke richtig drin, CTIA/OMTP.")
+elif snr < 20:
+    print(f"=> Sprache kommt an, aber nur {snr:.0f} dB ueber dem Rauschen.")
+    print("   Whisper braucht ~35 dB - darunter erfindet es Woerter.")
+else:
+    print("=> Gut. Sprache klar ueber dem Rauschen.")
+PY
+rm -rf "$TMP"

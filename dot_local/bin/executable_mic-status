@@ -1,0 +1,52 @@
+#!/bin/bash
+# Nur-Lesen-Statusbericht zum Mikrofon. Aendert nichts.
+# Gedacht fuer die Kontrolle NACH einem Neustart: laeuft die Jack-Erkennung
+# jetzt von selbst, oder muss die Klinke wieder neu eingesteckt werden?
+set -u
+
+for c in $(seq 0 3); do
+    grep -qs ALC285 "/proc/asound/card$c/codec#0" && CARD=$c && break
+done
+CARD=${CARD:-2}
+HW="/sys/class/sound/hwC${CARD}D0"
+
+echo "=== System ==="
+echo "  Boot: $(uptime -s)   ($(uptime -p))"
+echo "  Kernel: $(uname -r)"
+echo "  pipewire: $(pacman -Q pipewire 2>/dev/null | awk '{print $2}')"
+
+echo
+echo "=== Codec-Pin 0x19 (Mikrofonkontakt der Klinke) ==="
+echo "  aktiv (init):  $(grep -E '^0x19 ' "$HW/init_pin_configs" 2>/dev/null | awk '{print $2}')"
+echo "  Fixup will:    $(grep -E '^0x19 ' "$HW/driver_pin_configs" 2>/dev/null | awk '{print $2}')"
+echo "  Erwartung: 0x411111f0 = 'nicht angeschlossen' (schlecht),"
+echo "             0x03a11020 = Jack mit Mic-Detect  (gut, Fixup hat gegriffen)"
+echo "  modprobe-Overrides: $(ls /etc/modprobe.d/ 2>/dev/null | grep -c alsa) alsa-Datei(en) - soll 0 sein"
+
+echo
+echo "=== Jack-Erkennung ==="
+pactl list cards | grep -E "^\s+analog-(input-mic|input-internal-mic|output-headphones):" \
+    | sed 's/^\s*/  /' | cut -d, -f1,5
+
+echo
+echo "=== Aktive Aufnahmequelle ==="
+pactl list sources | sed -n '/Name: alsa_input.*analog-stereo/,/Formats/p' \
+    | grep -E "Mute:|Volume: front-left|Active Port:" | sed 's/^\s*/  /'
+DEF=$(wpctl status 2>/dev/null | sed -n '/Sources:/,/Filters:/p' | grep -c '\*')
+echo "  Default-Source gesetzt: $([ "$DEF" -gt 0 ] && echo ja || echo 'NEIN - WirePlumber hat die Node verworfen')"
+
+echo
+echo "=== Verstaerkung ==="
+amixer -c "$CARD" sget Capture 2>/dev/null | grep -m1 "Front Left:" | sed 's/^\s*/  Capture: /'
+for b in 'Mic Boost' 'Internal Mic Boost'; do
+    amixer -c "$CARD" sget "$b" 2>/dev/null | grep -m1 "Front Left:" | sed "s/^\s*/  $b: /"
+done
+
+echo
+echo "=== Bewertung ==="
+if pactl list cards | grep -E "^\s+analog-input-mic:" | grep -q "not available"; then
+    echo "  Headset-Mic NICHT verfuegbar."
+    echo "  -> Klinke einmal aus- und wieder einstecken, dann 'mic-fix'."
+else
+    echo "  Headset-Mic verfuegbar. -> 'mic-fix' und danach 'mic-check' zur Kontrolle."
+fi
