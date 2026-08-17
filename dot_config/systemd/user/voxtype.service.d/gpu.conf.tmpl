@@ -1,0 +1,20 @@
+# Voxtype: GPU-Auswahl fuer die Whisper-Transkription (Vulkan-Backend).
+#
+# Ohne Vorgabe nimmt ggml das erste Vulkan-Geraet. Auf Rechnern mit iGPU + dGPU
+# ist das die iGPU — also ausgerechnet die schwache. VOXTYPE_VULKAN_DEVICE
+# allein genuegt nicht: /usr/bin/voxtype ist nur ein Symlink aufs Binary und
+# kein Wrapper, der die Variable in VK_LOADER_DRIVERS_SELECT uebersetzt.
+# Zuverlaessig filtert nur GGML_VK_VISIBLE_DEVICES die Geraeteliste.
+#
+# ACHTUNG: Der Index ist rechner-spezifisch. Vor dem Setzen pruefen:
+#   journalctl --user -u voxtype | grep ggml_vulkan
+# Danach muss "Found 1 Vulkan devices" mit der richtigen Karte dastehen.
+[Service]
+Environment="VOXTYPE_VULKAN_DEVICE=nvidia"
+{{ if eq .machine "laptop" -}}
+# ASUS ROG Zephyrus G15: 0 = AMD Radeon 680M (iGPU), 1 = NVIDIA RTX 3070 Ti.
+Environment="GGML_VK_VISIBLE_DEVICES=1"
+{{- else -}}
+# Index hier noch nicht verifiziert — erst die Geraeteliste im Log pruefen,
+# dann analog zum laptop-Zweig GGML_VK_VISIBLE_DEVICES setzen.
+{{- end }}

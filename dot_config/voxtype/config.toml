@@ -61,10 +61,14 @@ initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschrei
 # Primary output mode: "type" or "clipboard"
 # - type: Simulates keyboard input at cursor position (requires ydotool)
 # - clipboard: Copies text to clipboard (requires wl-copy)
-# Reihenfolge der Tipp-Treiber. ydotool zuerst, weil WezTerm (Februar 2024)
-# das Layout des wtype-Virtualkeyboards ignoriert und Zeichensalat produziert.
-# ydotool erzeugt ein echtes Kernel-Eingabegerät und wird korrekt gelesen.
-driver_order = ["ydotool", "wtype", "clipboard"]
+# Reihenfolge der Tipp-Treiber. wtype zuerst, weil ydotool ueber Kernel-Keycodes
+# tippt und damit durch das AKTIVE Tastaturlayout laeuft: steht das auf US
+# (us/de-Toggle), fallen alle Umlaute aus — genau das Problem am 17.08.2026.
+# wtype bringt ein eigenes Keymap mit und schreibt Unicode direkt, unabhaengig
+# vom Layout. ydotool bleibt als Fallback: WezTerm ignorierte (Februar 2024) das
+# wtype-Keymap und produzierte Zeichensalat — falls das nochmal auftritt, hier
+# wieder tauschen (betrifft nur WezTerm, nicht Ghostty/Alacritty/Kitty).
+driver_order = ["wtype", "ydotool", "clipboard"]
 
 mode = "type"
 
