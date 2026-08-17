@@ -42,6 +42,14 @@ o.window({ title = "^Ghostty-WS4$" }, { workspace = "4" })
 o.window("^obsidian$", { workspace = "4" })
 o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
 {{- else if eq .machine "omarchy" -}}
--- Software-Cursor für wayvnc
-hl.env("WLR_NO_HARDWARE_CURSORS", "1")
+-- Software-Cursor für wayvnc: ein Hardware-Cursor taucht im VNC-Stream nicht
+-- auf, weil er nie ins Framebuffer gerendert wird. WLR_NO_HARDWARE_CURSORS
+-- greift dafür nicht mehr — Hyprland setzt seit 0.41 nicht mehr auf wlroots
+-- und ignoriert die Variable. Der Default 2 ("auto") überlässt die Wahl dem
+-- Treiber, deshalb hier explizit.
+hl.config({
+  cursor = {
+    no_hardware_cursors = true,
+  },
+})
 {{- end }}
