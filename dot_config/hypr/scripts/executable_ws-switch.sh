@@ -26,24 +26,23 @@ conf="$HOME/.config/hypr/scripts/qtile-mode.conf"
 MAIN_MONITOR=""
 [ -f "$conf" ] && . "$conf"
 
-# Workspace auf einem bestimmten Monitor fokussieren. Ohne Monitor bleibt es bei
-# Hyprlands Standardverhalten (Workspace auf seinem Heimat-Monitor).
 focus_ws() {
-  local target_ws="$1" target_mon="$2"
-  if [ -n "$target_mon" ]; then
-    hyprctl dispatch "hl.dsp.focus({ workspace = \"$target_ws\", monitor = \"$target_mon\" })"
-  else
-    hyprctl dispatch "hl.dsp.focus({ workspace = \"$target_ws\" })"
-  fi
+  hyprctl dispatch "hl.dsp.focus({ workspace = \"$1\" })"
 }
 
 if [ -f "$mode_file" ]; then
-  # qtile-Mode: auf den Haupt-Monitor (oder, falls leer, den fokussierten) holen
+  # qtile-Mode: Workspace zum Zielmonitor holen, statt ihm zu folgen.
+  # Erst fokussieren (damit er der aktive ist), dann herueberziehen.
+  # ACHTUNG: unter Omarchy 4 noch nicht praktisch erprobt - der qtile-Mode war
+  # beim Umbau aus. Falls er hakt, ist hl.dsp.workspace.move die Stelle.
   target="$MAIN_MONITOR"
-  [ -z "$target" ] && target="$(hyprctl activeworkspace -j | jq -r '.monitor // empty')"
-  focus_ws "$ws" "$target"
+  [ -z "$target" ] && target="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+  focus_ws "$ws"
+  [ -n "$target" ] && hyprctl dispatch "hl.dsp.workspace.move({ monitor = \"$target\" })" >/dev/null
+  focus_ws "$ws"
 else
-  # Normal-Mode: Heimat-Monitor dynamisch aus den Workspace-Rules ermitteln
-  home="$(hyprctl workspacerules -j | jq -r --arg w "$ws" '.[] | select(.workspaceString==$w) | .monitor // empty' | head -1)"
-  focus_ws "$ws" "$home"
+  # Normal-Mode: Hyprland kennt die Heimat aus den Workspace-Rules (monitors.lua)
+  # und wechselt den Monitor selbst mit. Ein zusaetzlicher monitor-Parameter
+  # wuerde den Workspace-Wechsel sogar verschlucken.
+  focus_ws "$ws"
 fi
