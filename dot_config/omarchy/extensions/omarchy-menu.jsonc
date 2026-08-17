@@ -1,0 +1,40 @@
+{
+  // Extend the Quickshell Omarchy menu with JSONC.
+  //
+  // IDs are object keys. The parent is inferred from the dotted id, so
+  // "personal.notes" appears under "personal", and "personal" appears on the
+  // root menu. Reuse an existing id to override/extend it.
+  //
+  // Fields:
+  //   icon        Nerd Font glyph shown in the icon column.
+  //   label       Visible row title.
+  //   action      Shell command to run. If omitted, the row is a submenu.
+  //   target      Existing submenu id to open. Use for links/aliases.
+  //   provider    Runtime provider function/command returning JSON rows.
+  //   aliases     alternate `omarchy menu summon <name>` routes; also searchable.
+  //   description Optional subtitle and extra search text.
+  //   when        Shell condition; hide row when it fails.
+  //   checked     Shell condition; append ✓ when it succeeds.
+  //
+  // Examples:
+  // "personal": {"icon":"","label":"Personal"},
+  // "personal.notes": {"icon":"󰎞","label":"Notes","action":"omarchy-launch-editor ~/notes"},
+  // "personal.files": {"icon":"","label":"Files","action":"uwsm-app -- nautilus ~/Documents"},
+  //
+  // Only use provider when a provider_name function or command named "name"
+  // returns JSON rows. Static submenus only need dotted ids.
+
+  // --- Diktat: Backend umschalten -----------------------------------------
+  // voxtype und hyprwhspr koennen nicht gleichzeitig laufen: gleiche
+  // Audio-Quelle, und jeder laedt ein eigenes large-v3 (~3 GB VRAM).
+  // dictation-switch schaltet deshalb immer genau einen scharf, inklusive
+  // systemctl enable/disable, damit die Wahl den Reboot ueberlebt.
+  // Die Keybindings zeigen auf dictation-record, das erst beim Tastendruck
+  // entscheidet - ein Wechsel braucht daher keinen Hyprland-Reload.
+  // Die Zeilen blenden sich aus, wenn das Backend nicht installiert ist.
+  "dictation": {"icon":"󰍬","label":"Diktat","aliases":["dictation","spracherkennung"],"description":"Spracherkennung: voxtype oder hyprwhspr"},
+  "dictation.voxtype": {"icon":"󰕾","label":"Voxtype","description":"whisper.cpp, GPU über Vulkan","action":"dictation-switch voxtype","checked":"dictation-switch --is voxtype","when":"command -v voxtype"},
+  "dictation.hyprwhspr": {"icon":"󰜋","label":"hyprwhspr","description":"faster-whisper im Python-venv","action":"dictation-switch hyprwhspr","checked":"dictation-switch --is hyprwhspr","when":"test -x /usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh"},
+  "dictation.off": {"icon":"󰍭","label":"Aus","description":"Beide Dienste stoppen","action":"dictation-switch off","checked":"test \"$(dictation-switch --active)\" = none"},
+  "dictation.status": {"icon":"󰋼","label":"Status","description":"Welches Backend läuft, und auf welcher GPU","action":"omarchy-launch-floating-terminal-with-presentation zsh -c 'dictation-switch --status; read -k 1'"},
+}

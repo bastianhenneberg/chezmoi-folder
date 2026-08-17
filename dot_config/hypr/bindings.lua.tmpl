@@ -80,12 +80,22 @@ end
 -- Seit Omarchy 4 über voxtype. Auf Rechnern, die noch hyprwhspr fahren, greift
 -- automatisch der zweite Zweig. Omarchy legt bei vorhandenem voxtype zusätzlich
 -- SUPER+CTRL+X und F9 (push-to-talk) auf dieselbe Funktion.
-local hyprwhspr_tray = "/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh"
-if o.cmd_present("voxtype") then
-  o.bind("SUPER + ALT + D", "Speech-to-text", "voxtype record toggle")
-elseif o.cmd_present(hyprwhspr_tray) then
-  o.bind("SUPER + ALT + D", "Speech-to-text", hyprwhspr_tray .. " record")
-end
+-- Seit Omarchy 4 stehen voxtype und hyprwhspr nebeneinander. Sie duerfen nicht
+-- gleichzeitig laufen (gleiche Audio-Quelle, je ein large-v3 im VRAM), deshalb
+-- waehlt `dictation-switch` genau eines aus - per Omarchy-Menue > Diktat.
+-- Die Taste zeigt bewusst NICHT direkt auf ein Backend, sondern auf
+-- `dictation-record`: das entscheidet erst beim Druck, welcher Dienst laeuft.
+-- Dadurch braucht ein Backend-Wechsel keinen Hyprland-Reload.
+o.bind("SUPER + ALT + D", "Speech-to-text", "dictation-record toggle")
+
+-- Omarchy legt bei vorhandenem voxtype zusaetzlich SUPER+CTRL+X (Toggle) und
+-- F9 (push-to-talk) direkt auf voxtype. Der Toggle wird hier auf denselben
+-- Wrapper umgebogen, sonst greift er ins Leere, sobald hyprwhspr aktiv ist.
+-- F9 bleibt unangetastet: dessen Release-Binding laesst sich mit der
+-- Lua-API nicht zuverlaessig nachbauen - push-to-talk gilt also nur fuer
+-- voxtype.
+hl.unbind("SUPER + CTRL + X")
+o.bind("SUPER + CTRL + X", "Toggle dictation", "dictation-record toggle")
 
 -- ---------------------------------------------------------------------------
 -- TigerVNC

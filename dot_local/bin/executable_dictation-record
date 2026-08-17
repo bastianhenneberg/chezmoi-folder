@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Leitet einen Diktat-Befehl an das gerade aktive Backend weiter.
+#
+# Der Sinn: die Hyprland-Keybindings zeigen fest hierher, statt direkt auf
+# `voxtype` oder den hyprwhspr-Tray. Dadurch braucht ein Backend-Wechsel per
+# dictation-switch KEINEN Config-Reload - die Entscheidung faellt erst beim
+# Tastendruck.
+#
+# Aufrufe: dictation-record toggle|start|stop|cancel
+set -uo pipefail
+
+HYPRWHSPR_TRAY=/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh
+action="${1:-toggle}"
+
+case "$(dictation-switch --active)" in
+  voxtype)
+    exec voxtype record "$action"
+    ;;
+  hyprwhspr)
+    # Der Tray kennt kein start/stop fuer die AUFNAHME, nur `record` als
+    # Umschalter (start/stop steuern dort den Dienst selbst). Push-to-talk
+    # laesst sich damit nicht abbilden, deshalb wird alles auf record
+    # abgebildet - ausser cancel, das es dort nicht gibt.
+    case "$action" in
+      cancel) exit 0 ;;
+      *) exec "$HYPRWHSPR_TRAY" record ;;
+    esac
+    ;;
+  *)
+    command -v notify-send >/dev/null 2>&1 &&
+      notify-send -u critical -t 5000 "  Diktat" "Kein Backend aktiv — 'dictation-switch voxtype' oder über das Omarchy-Menü wählen."
+    exit 1
+    ;;
+esac

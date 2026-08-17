@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# Umschalter zwischen den beiden Diktat-Backends: voxtype und hyprwhspr.
+#
+# Warum ueberhaupt: beide greifen auf dieselbe Audio-Quelle zu und laden je ein
+# large-v3 nach (~3 GB VRAM). Gleichzeitig laufen sie sich gegenseitig tot,
+# deshalb schaltet dieses Script immer genau einen scharf und den anderen ab -
+# inklusive `systemctl enable/disable`, damit die Wahl den Reboot ueberlebt.
+#
+# Der Zustand wird NICHT in einer eigenen Datei gefuehrt, sondern aus systemd
+# gelesen. Eine zweite Quelle der Wahrheit waere nur eine weitere Stelle, die
+# falsch stehen kann.
+#
+# Aufrufe:
+#   dictation-switch voxtype|hyprwhspr   umschalten
+#   dictation-switch toggle              zum jeweils anderen wechseln
+#   dictation-switch off                 beide abschalten
+#   dictation-switch --active            gibt voxtype|hyprwhspr|none aus
+#   dictation-switch --is <name>         Exit 0, wenn <name> aktiv ist (fuers Menue)
+#   dictation-switch --status            lesbarer Statusbericht
+set -uo pipefail
+
+HYPRWHSPR_TRAY=/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh
+
+have_voxtype() { command -v voxtype >/dev/null 2>&1; }
+have_hyprwhspr() { [ -x "$HYPRWHSPR_TRAY" ]; }
+
+unit_of() { [ "$1" = voxtype ] && echo voxtype.service || echo hyprwhspr.service; }
+
+# Aktiv = laeuft gerade. Faellt zurueck auf "ist fuer den naechsten Start
+# vorgemerkt", damit ein abgestuerzter Dienst (hyprwhspr steht gern auf
+# `failed`) nicht als "nichts gewaehlt" erscheint.
+active() {
+  local d
+  for d in voxtype hyprwhspr; do
+    systemctl --user is-active --quiet "$(unit_of "$d")" 2>/dev/null && { echo "$d"; return; }
+  done
+  for d in voxtype hyprwhspr; do
+    systemctl --user is-enabled --quiet "$(unit_of "$d")" 2>/dev/null && { echo "$d"; return; }
+  done
+  echo none
+}
+
+available() {
+  local d out=()
+  have_voxtype && out+=(voxtype)
+  have_hyprwhspr && out+=(hyprwhspr)
+  printf '%s\n' "${out[@]:-}"
+}
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 && notify-send -t 4000 "  Diktat" "$1" || echo "$1"
+}
+
+disable_backend() {
+  local unit; unit=$(unit_of "$1")
+  systemctl --user disable --now "$unit" >/dev/null 2>&1
+  # Ein `failed` bleibt sonst als Status stehen und verwirrt beim naechsten Blick.
+  systemctl --user reset-failed "$unit" >/dev/null 2>&1
+}
+
+enable_backend() {
+  local unit; unit=$(unit_of "$1")
+  systemctl --user enable --now "$unit" >/dev/null 2>&1
+}
+
+switch_to() {
+  local want="$1" other
+
+  case "$want" in
+    voxtype) have_voxtype || { notify "voxtype ist auf diesem Rechner nicht installiert."; exit 1; }; other=hyprwhspr ;;
+    hyprwhspr) have_hyprwhspr || { notify "hyprwhspr ist auf diesem Rechner nicht installiert."; exit 1; }; other=voxtype ;;
+    *) echo "Unbekanntes Backend: $want" >&2; exit 2 ;;
+  esac
+
+  # Erst den anderen weg, dann den gewuenschten hoch - sonst ueberlappen sich
+  # zwei Modelle im VRAM und die Aufnahme scheitert an der belegten Quelle.
+  disable_backend "$other"
+  enable_backend "$want"
+
+  sleep 1
+  if systemctl --user is-active --quiet "$(unit_of "$want")"; then
+    notify "$want ist jetzt aktiv."
+  else
+    notify "$want liess sich nicht starten - siehe: journalctl --user -u $(unit_of "$want")"
+    exit 1
+  fi
+}
+
+case "${1:---status}" in
+  voxtype | hyprwhspr)
+    switch_to "$1"
+    ;;
+  toggle)
+    case "$(active)" in
+      voxtype) switch_to hyprwhspr ;;
+      *) switch_to voxtype ;;
+    esac
+    ;;
+  off)
+    disable_backend voxtype
+    disable_backend hyprwhspr
+    notify "Diktat abgeschaltet."
+    ;;
+  --active)
+    active
+    ;;
+  --is)
+    [ "${2:-}" = "$(active)" ]
+    ;;
+  --available)
+    available
+    ;;
+  --status)
+    cur=$(active)
+    echo "Aktiv:      $cur"
+    echo "Verfuegbar: $(available | tr '\n' ' ')"
+    for d in voxtype hyprwhspr; do
+      u=$(unit_of "$d")
+      printf '  %-10s %s / %s\n' "$d" \
+        "$(systemctl --user is-active "$u" 2>/dev/null)" \
+        "$(systemctl --user is-enabled "$u" 2>/dev/null)"
+    done
+    if [ "$cur" = voxtype ] && command -v voxtype >/dev/null; then
+      echo
+      voxtype setup gpu --status 2>/dev/null | sed -n '1,5p'
+    fi
+    ;;
+  *)
+    sed -n '2,20p' "$0"
+    exit 2
+    ;;
+esac
