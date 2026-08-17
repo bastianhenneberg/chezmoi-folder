@@ -5,8 +5,14 @@
 # autostart, monitors, looknfeel); envs.conf war leer, die NVIDIA-Variablen
 # setzt Omarchy selbst in default/hypr/nvidia.lua.
 #
-# Bleibt bewusst stehen: hypridle.conf, hyprlock.conf, hyprsunset.conf und
-# xdph.conf - die lesen eigene Programme, nicht Hyprland.
+# hypridle.conf und hyprlock.conf gehen mit: die Programme sind unter Omarchy 4
+# gar nicht mehr installiert (`pacman -Q hypridle hyprlock` findet nichts).
+# Idle und Sperre uebernehmen quickshell (/usr/share/omarchy/shell) und
+# omarchy-sleep-lock.service.
+#
+# Bleibt bewusst stehen: hyprsunset.conf und xdph.conf - hyprsunset 0.4.0 und
+# xdg-desktop-portal-hyprland 1.4.1 sind installiert und lesen sie weiterhin
+# (omarchy-toggle-nightlight ruft hyprsunset direkt auf).
 .config/hypr/autostart.conf
 .config/hypr/bindings.conf
 .config/hypr/envs.conf
@@ -14,3 +20,5 @@
 .config/hypr/input.conf
 .config/hypr/looknfeel.conf
 .config/hypr/monitors.conf
+.config/hypr/hypridle.conf
+.config/hypr/hyprlock.conf
