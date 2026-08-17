@@ -63,6 +63,20 @@ o.bind("SUPER + ALT + SPACE", "Omarchy menu", "omarchy-menu toggle root")
 -- ---------------------------------------------------------------------------
 o.bind("SUPER + SHIFT + T", "Activity", { tui = "btop" })
 
+-- yazi als Dateimanager. Beim Umstieg auf die Lua-Config verlorengegangen und
+-- am 17.08.2026 nachgetragen: Omarchy 4 belegt SUPER+SHIFT+E selbst mit
+-- "Email", das hier bewusst weicht (war in der alten bindings.conf ebenfalls
+-- auskommentiert).
+-- Absichtlich NICHT die { tui = "yazi" }-Kurzform: omarchy-launch-tui kennt
+-- kein Arbeitsverzeichnis, yazi wuerde dann immer in $HOME starten statt im
+-- Ordner des aktiven Terminals.
+hl.unbind("SUPER + SHIFT + E") -- war: Email
+o.bind(
+  "SUPER + SHIFT + E",
+  "File explorer (yazi)",
+  "uwsm app -- ghostty --working-directory=$(omarchy-cmd-terminal-cwd) -e yazi"
+)
+
 -- ---------------------------------------------------------------------------
 -- qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen
 -- ---------------------------------------------------------------------------

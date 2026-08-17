@@ -1,0 +1,16 @@
+# Omarchy 4 (17.08.2026): Hyprland liest die Lua-Config (`hyprctl systeminfo`
+# meldet configProvider: lua). Die alte .conf-Kette wurde damit wirkungslos -
+# sie lag nur noch herum und lud zum Irrtum ein, man koenne dort etwas aendern.
+# Inhalte sind vollstaendig in die .lua-Dateien portiert (input, bindings,
+# autostart, monitors, looknfeel); envs.conf war leer, die NVIDIA-Variablen
+# setzt Omarchy selbst in default/hypr/nvidia.lua.
+#
+# Bleibt bewusst stehen: hypridle.conf, hyprlock.conf, hyprsunset.conf und
+# xdph.conf - die lesen eigene Programme, nicht Hyprland.
+.config/hypr/autostart.conf
+.config/hypr/bindings.conf
+.config/hypr/envs.conf
+.config/hypr/hyprland.conf
+.config/hypr/input.conf
+.config/hypr/looknfeel.conf
+.config/hypr/monitors.conf
