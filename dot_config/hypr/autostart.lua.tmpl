@@ -6,8 +6,12 @@ o.exec_on_start(
   "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
 )
 
--- Workspaces vorbereiten, damit die Fenster ihre Zielplätze finden
-o.exec_on_start("sleep 1 && hyprctl dispatch workspace 2 && hyprctl dispatch workspace 4 && hyprctl dispatch workspace 1")
+-- Workspaces vorbereiten, damit die Fenster ihre Zielplätze finden.
+-- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
+-- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
+o.exec_on_start(
+  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "4" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "1" })']]
+)
 
 -- Workspace 1 (DP-3, links): Chrome
 o.exec_on_start("sleep 2 && uwsm app -- google-chrome-stable")
@@ -23,8 +27,12 @@ o.exec_on_start(
   "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
 )
 
--- Workspaces auf externem Monitor erstellen
-o.exec_on_start("sleep 1 && hyprctl dispatch workspace 2 && hyprctl dispatch workspace 4 && hyprctl dispatch workspace 5")
+-- Workspaces auf externem Monitor erstellen.
+-- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
+-- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
+o.exec_on_start(
+  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "4" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "5" })']]
+)
 
 -- Workspace 1 (eDP-2): Zen Browser
 o.exec_on_start("sleep 2 && uwsm app -- zen-browser")
