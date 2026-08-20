@@ -114,6 +114,13 @@ Host jitsi-meet
     HostName 178.104.42.244
     User infra-monitor
     IdentityFile ~/.ssh/infra-monitor
+# moonlit-winds — Forge-Server (peppermint-connect app/demo, u.a.)
+# fail2ban-Jail aktiv -> NICHT pro Befehl neu verbinden.
+Host moonlit-winds 178.104.193.196
+    HostName 178.104.193.196
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
 {{- else -}}
 Host github.com
     User git

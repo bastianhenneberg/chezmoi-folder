@@ -32,6 +32,12 @@
             "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/no-host-dev-server.sh'",
             "timeout": 10,
             "statusMessage": "Pruefe auf Host-Dev-Server..."
+          },
+          {
+            "type": "command",
+            "command": "bash '{{ .chezmoi.homeDir }}/.claude/hooks/ssh-one-connection.sh'",
+            "timeout": 10,
+            "statusMessage": "SSH-Guardrail prueft Befehl"
           }
         ]
       }
