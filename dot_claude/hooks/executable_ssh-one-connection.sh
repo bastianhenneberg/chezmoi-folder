@@ -1,65 +1,101 @@
 #!/usr/bin/env bash
+# PreToolUse-Guard: SSH multiplext auf diesen Rechnern bereits — eigene
+# Control-Flags schalten es AB.
 #
-# SSH-Guardrail: verhindert, dass ein Aufruf das global konfigurierte
-# Multiplexing aushebelt.
+# ~/.ssh/config setzt in der `Host *`-Sektion ControlMaster auto,
+# ControlPersist 10m und ControlPath ~/.ssh/cm/%r@%h:%p. Der erste Aufruf baut
+# die Verbindung auf, jeder weitere laeuft durch denselben Socket. Es ist also
+# nichts einzurichten — nur nichts kaputtzumachen.
 #
-# Hintergrund: ~/.ssh/config setzt in der `Host *`-Sektion ControlMaster auto,
-# ControlPersist 10m und ControlPath ~/.ssh/cm/%r@%h:%p. Damit laufen alle
-# Befehle an denselben Host durch EINE Verbindung — ohne dass irgendetwas
-# mitgegeben werden muesste.
+# Wer -o ControlPath / -o ControlMaster / -S / -M mitgibt, zeigt auf einen
+# ANDEREN Socket, findet dort keinen Master und baut pro Befehl neu auf. Auf den
+# infra-monitor-Hosts schlaegt dann fail2ban zu: "Connection timed out",
+# waehrend die Webseiten desselben Servers weiter 200 liefern — sieht nach
+# Serverausfall aus, ist selbstverschuldet.
 #
-# Wer eigene -o ControlPath/-o ControlMaster/-S/-M mitgibt, zeigt auf einen
-# ANDEREN Socket als den konfigurierten. SSH findet dort keinen Master und baut
-# neu auf. Der Aufruf sieht nach Wiederverwendung aus und ist das Gegenteil.
+# Bewusst durchgelassen:
+#   - alles hinter dem ersten `<<` (Heredoc-Nutzlast: Dokumentation, Skripte,
+#     Commit-Nachrichten). Ein echter Aufruf steht IMMER davor — auch bei
+#     `ssh host 'bash -s' <<EOF`.
+#   - alles, was ein Segment nicht ANFAENGT. Damit bleibt `grep -o ControlPath
+#     ~/.ssh/config` erlaubt.
 #
-# Auf den infra-monitor-Hosts laeuft ein fail2ban-Jail: nach wenigen frischen
-# Verbindungen kommt "Connection timed out", waehrend die Webseiten weiter mit
-# 200 antworten — sieht nach Serverausfall aus, ist selbstverschuldet.
-#
-# Siehe Memory learning_ssh_one_connection_not_many.
+# Exit 0 + JSON auf stdout = Entscheidung. Ohne Ausgabe laeuft der Befehl normal.
 
 set -uo pipefail
 
-cmd=$(jq -r '.tool_input.command // ""' 2>/dev/null) || exit 0
-[ -n "$cmd" ] || exit 0
+eingabe="$(cat)"
+befehl="$(printf '%s' "$eingabe" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 
-# Heredoc-Inhalte abschneiden: was dort steht, ist Nutzlast (Dokumentation,
-# Python-Skripte, Commit-Nachrichten) und wird von dieser Shell nicht als ssh
-# ausgefuehrt. Ohne diesen Schnitt blockiert der Riegel das Schreiben ueber
-# sich selbst — am 20.08.2026 prompt passiert. Ein echter ssh-Aufruf steht
-# immer VOR dem `<<` (auch bei `ssh host 'bash -s' <<EOF`).
-pruef=${cmd%%<<*}
+[ -z "$befehl" ] && exit 0
 
-# Nur eingreifen, wenn ueberhaupt ssh/scp/sftp im Spiel ist.
-printf '%s' "$pruef" | grep -qE '(^|[;&|(`[:space:]])(ssh|scp|sftp)([[:space:]]|$)' || exit 0
+# Heredoc-Nutzlast abschneiden — sonst blockiert der Riegel das Schreiben ueber
+# sich selbst.
+pruef="${befehl%%<<*}"
 
-msg=""
-if printf '%s' "$pruef" | grep -qiE '\-o[[:space:]]*"?'\''?Control(Path|Master|Persist)'; then
-    msg="eigene -o Control*-Flags ueberschreiben ~/.ssh/config und erzwingen eine NEUE Verbindung"
-elif printf '%s' "$pruef" | grep -qE '(ssh|scp|sftp)[^;|&]*[[:space:]]-[MS][[:space:]]'; then
-    msg="-M/-S bauen einen eigenen Master neben dem bereits konfigurierten"
-fi
+# Den Begruendungstext als Variable aufbauen und per --arg uebergeben, NICHT im
+# jq-Programm zusammensetzen: der Text enthaelt Anfuehrungszeichen beider Sorten,
+# und die beenden sonst die Bash-Zeichenkette. Genau daran ist eine fruehere
+# Fassung gescheitert — jq bekam ein abgeschnittenes Programm, brach mit einem
+# Syntaxfehler ab, und der Riegel liess ALLES durch, ohne dass es auffiel.
+verweigern() {
+	local grund="$1" text
+	text=$(
+		cat <<'ENDE'
+Dieser Rechner multiplext BEREITS global (ControlMaster auto, ControlPersist 10m,
+ControlPath ~/.ssh/cm/%r@%h:%p). Eigene Control-Flags zeigen auf einen anderen
+Socket, finden dort keinen Master und erzwingen pro Befehl eine NEUE Verbindung.
+Auf den infra-monitor-Hosts loest das die fail2ban-Sperre aus: "Connection timed
+out", waehrend die Webseiten desselben Servers weiter 200 liefern.
 
-if [ -n "$msg" ]; then
-    {
-        echo "SSH-GUARDRAIL blockiert: $msg."
-        echo
-        echo "Dieser Rechner multiplext BEREITS global:"
-        echo "  ControlMaster auto | ControlPersist 10m | ControlPath ~/.ssh/cm/%r@%h:%p"
-        echo "Es ist nichts einzurichten — nur nichts kaputtzumachen."
-        echo
-        echo "Richtig:"
-        echo "  ssh <alias> 'befehl1; befehl2; befehl3'      # mehrere Befehle in EINEN Aufruf"
-        echo "  ssh <alias> 'bash -s' <<'EOF' ... EOF        # fuer laengere Skripte"
-        echo
-        echo "Warten/Pollen gehoert AUF den Server (Schleife innerhalb des einen Aufrufs),"
-        echo "nicht in eine lokale Schleife, die im Takt neu anklopft."
-        echo
-        echo "Fehlt ein Host-Alias? In ~/.ssh/config eintragen (Host/HostName/User/"
-        echo "IdentityFile/IdentitiesOnly) — die Control-Einstellungen erbt er automatisch."
-        echo "Pruefen mit: ssh -G <alias> | grep -i control"
-    } >&2
-    exit 2
-fi
+Richtig:
+  ssh <alias> 'befehl1; befehl2; befehl3'   # mehrere Befehle, EIN Aufruf
+  ssh <alias> 'bash -s' <<'EOF' ... EOF     # fuer laengere Skripte
+
+Warten/Pollen gehoert AUF den Server (Schleife innerhalb des einen Aufrufs),
+nicht in eine lokale Schleife, die im Takt neu anklopft.
+
+Fehlt ein Host-Alias? In ~/.ssh/config eintragen (Host/HostName/User/
+IdentityFile/IdentitiesOnly) — die Control-Einstellungen erbt er automatisch.
+Pruefen mit: ssh -G <alias> | grep -i control
+ENDE
+	)
+
+	jq -n --arg g "$grund" --arg t "$text" \
+		'{hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: ("SSH-GUARDRAIL: " + $g + ".\n\n" + $t)
+      }}' || {
+		# Faellt jq aus, darf der Riegel NICHT stillschweigend durchlassen.
+		echo "SSH-GUARDRAIL: $grund (jq-Ausgabe fehlgeschlagen)" >&2
+		exit 2
+	}
+	exit 0
+}
+
+# Befehlskette in Segmente zerlegen: nur was ein Segment ANFAENGT, ist ein Aufruf.
+segmente="$(printf '%s' "$pruef" | sed 's/&&/\n/g; s/||/\n/g; s/;/\n/g; s/|/\n/g')"
+
+while IFS= read -r segment; do
+	segment="$(printf '%s' "$segment" | sed 's/^[[:space:]]*//')"
+	# fuehrende ENV-Zuweisungen abschneiden (FOO=bar ssh ...)
+	while printf '%s' "$segment" | grep -qE '^[A-Za-z_][A-Za-z0-9_]*='; do
+		segment="$(printf '%s' "$segment" | sed 's/^[^[:space:]]*[[:space:]]*//')"
+	done
+
+	case "$segment" in
+	ssh\ * | scp\ * | sftp\ *) ;;
+	*) continue ;;
+	esac
+
+	if printf '%s' "$segment" | grep -qiE '\-o[[:space:]]*"?'\''?Control(Path|Master|Persist)'; then
+		verweigern "eigene -o Control*-Flags ueberschreiben ~/.ssh/config"
+	fi
+
+	if printf '%s' "$segment" | grep -qE '[[:space:]]-[MS][[:space:]]'; then
+		verweigern "-M/-S bauen einen eigenen Master neben dem bereits konfigurierten"
+	fi
+done <<<"$segmente"
 
 exit 0
