@@ -88,10 +88,17 @@ mode = "paste"
 # Die Referenz-Config des Pakets empfiehlt genau diesen Wert fuer Omarchy.
 paste_keys = "shift+insert"
 
-# Zwischenablage nach dem Einfuegen wiederherstellen, damit ein Diktat nicht
-# das ueberschreibt, was man sich vorher kopiert hat.
-restore_clipboard = true
-restore_clipboard_delay_ms = 200
+# Zwischenablage NICHT wiederherstellen: das Diktat soll der aktuelle Eintrag
+# bleiben, damit es sich ohne Umweg ueber den Clipboard-Manager nochmal
+# einfuegen laesst.
+#
+# Am 24.08.2026 zuerst auf true gesetzt — aus der Annahme heraus, die
+# Zwischenablage muesse geschuetzt werden (so stand es in der Notiz vom
+# 17.08.). Das war die falsche Anforderung: der User will das Diktat
+# wiederverwenden. Mit true landete der alte Inhalt obenauf und das Diktat
+# auf Position 2 des Omarchy-Verlaufs, musste also von Hand herausgesucht
+# werden.
+restore_clipboard = false
 
 # Fall back to clipboard if typing fails
 fallback_to_clipboard = true
