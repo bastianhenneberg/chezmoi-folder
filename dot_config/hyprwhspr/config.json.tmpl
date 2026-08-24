@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/goodroot/hyprwhspr/main/share/config.schema.json",
+  "use_hypr_bindings": true,
+  "transcription_backend": "faster-whisper",
+  "faster_whisper_model": "large-v3",
+  "faster_whisper_device": "auto",
+  {{- /* laptop: RTX 3070 Ti, 8 GB — large-v3 fp16 belegt ~3,9 GB, passt mit Reserve (Wiki #91).
+         desktop/omarchy: int8_float16, so seit 625b9aa. Kein else-Fallback: ein unbekannter
+         Rechner soll abbrechen statt still die Karte eines anderen zu erben. */}}
+  "faster_whisper_compute_type": {{ if eq .machine "laptop" }}"float16"{{ else if eq .machine "desktop" }}"int8_float16"{{ else if eq .machine "omarchy" }}"int8_float16"{{ else }}{{ fail (printf "hyprwhspr: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}{{ end }},
+  "faster_whisper_vad_filter": true,
+  "language": "de",
+  "task": "transcribe",
+  "sampling_strategy": "beam_search",
+  "beam_size": 5,
+  "whisper_prompt": "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschreibung, Satzzeichen, Eigennamen und gängigen Fachbegriffen.",
+  "audio_ducking": true
+}

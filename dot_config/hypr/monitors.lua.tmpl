@@ -46,7 +46,5 @@ hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
 hl.env("GDK_SCALE", "2")
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 {{- else -}}
--- Fallback: auto-detect
-hl.env("GDK_SCALE", "1")
-hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+{{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end }}

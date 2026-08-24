@@ -52,4 +52,6 @@ hl.config({
     no_hardware_cursors = true,
   },
 })
+{{- else -}}
+{{ fail (printf "hyprland.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end }}

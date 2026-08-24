@@ -1,3 +1,6 @@
+{{- if not (or (eq .machine "laptop") (eq .machine "desktop") (eq .machine "omarchy")) -}}
+{{ fail (printf "input.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{- end -}}
 -- Persönliche Input-Overrides. Ersetzen Omarchys Defaults.
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
 

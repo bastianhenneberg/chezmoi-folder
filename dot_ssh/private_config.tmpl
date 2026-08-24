@@ -121,7 +121,7 @@ Host moonlit-winds 178.104.193.196
     User infra-monitor
     IdentityFile ~/.ssh/infra-monitor
     IdentitiesOnly yes
-{{- else -}}
+{{- else if or (eq .machine "laptop") (eq .machine "desktop") -}}
 Host github.com
     User git
     IdentityFile ~/.ssh/arch-linux-mobile
@@ -236,4 +236,6 @@ Host *
     ControlMaster auto
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 600
+{{- else -}}
+{{ fail (printf "ssh/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end -}}
