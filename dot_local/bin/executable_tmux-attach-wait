@@ -1,6 +1,0 @@
-#!/bin/bash
-# Wartet auf eine tmux-Session und attached dann
-until tmux has-session 2>/dev/null; do
-    sleep 0.5
-done
-exec tmux attach-session

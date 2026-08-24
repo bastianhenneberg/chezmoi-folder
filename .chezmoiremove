@@ -22,3 +22,24 @@
 .config/hypr/monitors.conf
 .config/hypr/hypridle.conf
 .config/hypr/hyprlock.conf
+
+# tmux-Setup (24.08.2026): herdr hat omarchy-tmux abgeloest und ist direkt
+# implementiert (/usr/bin/herdr, omarchy-launch-terminal-herdr). Nichts startet
+# mehr tmux: autostart.lua.tmpl vermerkt bereits "ohne tmux, da wir Herd nutzen",
+# die Hypr-Bindings haengen am Omarchy-4-Terminal, und tmux-attach-wait wurde
+# nirgends aufgerufen (grep ueber chezmoi, ~/.config und ~/.local/bin).
+#
+# Die drei omarchy-tmux-* Scripts in ~/.local/bin gehoeren keinem Paket
+# (`pacman -Qo` findet nichts) - sie stammen aus run_once_install-omarchy-tmux.sh,
+# das mit entfernt wurde. Deshalb muessen sie hier weg, sonst bleiben sie auf
+# jedem Rechner als Leichen liegen.
+#
+# Bewusst NICHT hier: ~/.local/share/omarchy/bin/omarchy-*tmux* sind root-Symlinks
+# nach /usr/bin und gehoeren dem Omarchy-Paket. Das tmux-Paket selbst (3.7_c-1)
+# bleibt ebenfalls installiert - das ist eine Systementscheidung, keine Dotfile-Frage.
+.config/tmux
+.local/bin/tmux-attach-wait
+.config/systemd/user/omarchy-tmux-monitor.service
+.local/bin/omarchy-tmux-generator
+.local/bin/omarchy-tmux-monitor
+.local/bin/omarchy-tmux-reload
