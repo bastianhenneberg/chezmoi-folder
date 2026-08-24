@@ -70,7 +70,28 @@ initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschrei
 # wieder tauschen (betrifft nur WezTerm, nicht Ghostty/Alacritty/Kitty).
 driver_order = ["wtype", "ydotool", "clipboard"]
 
-mode = "type"
+# 24.08.2026 von "type" auf "paste" umgestellt. Grund: wtype tippt Zeichen
+# einzeln, und bei jedem Abstand gab es Anwendungen, die einen Anschlag
+# verschlucken — 1 ms verlor Grossbuchstaben und Umlaute, 10 ms immer noch
+# Doppelbuchstaben ("bitte" -> "bite"). Weiter hochzudrehen behandelt das
+# Symptom und macht das Diktat proportional zur Textlaenge langsamer.
+# Im paste-Modus gibt es nur noch EINEN Tastendruck fuer den ganzen Text,
+# damit entfaellt die Fehlerklasse vollstaendig.
+#
+# Der Einwand vom 17.08. (ueberschreibt bei jedem Diktat die Zwischenablage)
+# ist durch restore_clipboard unten erledigt.
+mode = "paste"
+
+# Einfuegetaste. NICHT ctrl+v (der Standard): in Ghostty und jedem anderen
+# Terminal ist das kein Einfuegen. shift+insert traegt ueberall — Terminals,
+# GTK, Browser — und ist in ~/.config/ghostty/config ausdruecklich gebunden.
+# Die Referenz-Config des Pakets empfiehlt genau diesen Wert fuer Omarchy.
+paste_keys = "shift+insert"
+
+# Zwischenablage nach dem Einfuegen wiederherstellen, damit ein Diktat nicht
+# das ueberschreibt, was man sich vorher kopiert hat.
+restore_clipboard = true
+restore_clipboard_delay_ms = 200
 
 # Fall back to clipboard if typing fails
 fallback_to_clipboard = true
@@ -87,9 +108,9 @@ fallback_to_clipboard = true
 # Journal, kein Rueckfall auf ydotool) — der Text ging erst beim Tippen
 # verloren, siehe Memory #3005 zur selben Diagnose-Reihenfolge.
 #
-# Preis: ~10 ms pro Zeichen, bei 300 Zeichen also ~3 s. Fuehlt sich das
-# zaeh an, schrittweise auf 6 oder 5 zurueck; fallen wieder Zeichen aus,
-# auf 15. Wer die Latenz ganz loswerden will, nimmt paste-Modus (unten).
+# Im paste-Modus wirkungslos — steht nur noch fuer den Fall bereit, dass
+# wieder auf mode = "type" zurueckgestellt wird. 1 und 10 waren beide zu
+# wenig, ein Rueckweg muesste also deutlich hoeher ansetzen.
 type_delay_ms = 10
 
 # Leerzeichen ans Ende, damit aufeinanderfolgende Diktate nicht verkleben.
