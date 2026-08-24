@@ -77,7 +77,20 @@ fallback_to_clipboard = true
 
 # Delay between typed characters in milliseconds
 # 0 = fastest possible, increase if characters are dropped
-type_delay_ms = 1
+#
+# 24.08.2026 von 1 auf 10 erhoeht. Symptom: einzelne Zeichen fielen am
+# Wortanfang aus („Wir"->"ir", „Laptop"->"aptop", „muessen"->"mssen").
+# Verloren gingen genau die Zeichen, die wtype ueber einen Modifier oder
+# einen Keymap-Eintrag erzeugt (Grossbuchstaben, Umlaute) — bei 1 ms
+# registriert das Zielfenster die Modifier-Taste nicht rechtzeitig.
+# Die Transkription war nachweislich in Ordnung (keine Treiber-Fehler im
+# Journal, kein Rueckfall auf ydotool) — der Text ging erst beim Tippen
+# verloren, siehe Memory #3005 zur selben Diagnose-Reihenfolge.
+#
+# Preis: ~10 ms pro Zeichen, bei 300 Zeichen also ~3 s. Fuehlt sich das
+# zaeh an, schrittweise auf 6 oder 5 zurueck; fallen wieder Zeichen aus,
+# auf 15. Wer die Latenz ganz loswerden will, nimmt paste-Modus (unten).
+type_delay_ms = 10
 
 # Leerzeichen ans Ende, damit aufeinanderfolgende Diktate nicht verkleben.
 append_text = " "
