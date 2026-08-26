@@ -41,6 +41,19 @@ hl.workspace_rule({ workspace = "1", monitor = "eDP-2", default = true })
 hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1", default = true })
 hl.workspace_rule({ workspace = "4", monitor = "HDMI-A-1" })
 hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
+
+-- XREAL One Pro, am NVIDIA-Port (DP-1). Nur dieser Port traegt die 297 MHz
+-- fuer Ultra-Wide; der AMD-Port trainiert den Link nur auf RBR.
+--
+-- mode = "highrr" ist ABSICHT, nicht auf einen festen Modus aendern:
+--   Normalmodus  -> waehlt 1920x1080@120 (statt der bevorzugten 90)
+--   Ultra-Wide   -> waehlt 3840x1080@60, dem einzigen dann verfuegbaren
+-- Ein fest verdrahteter Modus wuerde die Brille beim Umschalten auf
+-- Ultra-Wide zurueckzwingen.
+hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "auto-right", scale = 1 })
+
+hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
 {{- else if eq .machine "omarchy" -}}
 -- omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), HiDPI Auto-Detect
 hl.env("GDK_SCALE", "2")
