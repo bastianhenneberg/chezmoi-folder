@@ -52,7 +52,7 @@ translate = false
 
 # Initial-Prompt: lenkt Groß-/Kleinschreibung, Satzzeichen und Fachbegriffe.
 # Übernommen aus der alten hyprwhspr-Konfiguration.
-initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschreibung, Satzzeichen, Eigennamen und gängigen Fachbegriffen."
+initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschreibung, Satzzeichen, Eigennamen und gängigen Fachbegriffen wie AI-Brain, Omarchy, Hyprland, chezmoi, yazi, voxtype, Peppermint."
 
 # Number of CPU threads for inference (omit for auto-detection)
 # threads = 4
@@ -143,14 +143,18 @@ on_recording_stop = true
 # Show notification with transcribed text after transcription completes
 on_transcription = false
 
-# [text]
+[text]
 # Text processing options (word replacements, spoken punctuation)
 #
 # Enable spoken punctuation conversion (e.g., say "period" to get ".")
 # spoken_punctuation = false
 #
-# Custom word replacements (case-insensitive)
-# replacements = { "hyperwhisper" = "hyprwhspr" }
+# Custom word replacements (case-insensitive).
+# 13.09.2026: Whisper hoert schnell gesprochenes "AI-Brain" gern als "iBrain"
+# oder "E-Brain" — der Fehler entsteht in der Erkennung (Journal zeigt es so),
+# nicht beim Einfuegen. Hier hart zurueckgebogen; Begriff steht zusaetzlich
+# im initial_prompt oben.
+replacements = { "iBrain" = "AI-Brain", "E-Brain" = "AI-Brain", "AI Brain" = "AI-Brain", "hyperwhisper" = "hyprwhspr" }
 
 [vad]
 # Silero-Sprachaktivitätserkennung — entspricht faster_whisper_vad_filter
