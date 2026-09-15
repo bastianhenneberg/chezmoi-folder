@@ -34,8 +34,9 @@ o.exec_on_start(
   [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "4" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "5" })']]
 )
 
--- Workspace 1 (eDP-2): Zen Browser
-o.exec_on_start("sleep 2 && uwsm app -- zen-browser")
+-- Workspace 1 (eDP-2): Chromium — über die .desktop-Datei, damit der
+-- Wrapper (~/.local/bin/chromium-wrapper, LIBVA_DRIVER_NAME=radeonsi) greift.
+o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
 
 -- Workspace 5 (HDMI-A-1): Thunderbird
 o.exec_on_start("sleep 3 && uwsm app -- thunderbird")

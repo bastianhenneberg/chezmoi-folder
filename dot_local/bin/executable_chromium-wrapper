@@ -1,0 +1,7 @@
+#!/bin/sh
+# Chromium auf der AMD-iGPU decodieren lassen (Rembrandt 680M kann H264/VP9/AV1).
+# Omarchy setzt global LIBVA_DRIVER_NAME=nvidia (default/hypr/nvidia.lua), aber
+# Chromiums GPU-Prozess laeuft auf renderD129 (amdgpu) — NVIDIA-VA-API-Frames lassen
+# sich dort nicht importieren (eglCreateImage EGL_BAD_MATCH), Video stottert/haengt.
+export LIBVA_DRIVER_NAME=radeonsi
+exec /usr/bin/chromium "$@"
