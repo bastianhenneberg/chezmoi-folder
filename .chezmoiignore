@@ -1,0 +1,11 @@
+# Wird von chezmoi immer als Template gelesen. Pfade sind ZIEL-Pfade
+# (ohne dot_-Praefix), relativ zu $HOME.
+
+{{ if ne .machine "laptop" -}}
+# Chromium-Wrapper fuer die AMD-iGPU des Laptops: erzwingt
+# LIBVA_DRIVER_NAME=radeonsi. Auf Desktop (nur RTX 3080) und omarchy gibt es
+# keinen radeonsi-Treiber - Chromium wuerde dort die Hardware-Videodekodierung
+# verlieren. Deshalb nur auf dem Laptop ausrollen.
+.local/bin/chromium-wrapper
+.local/share/applications/chromium.desktop
+{{ end -}}
