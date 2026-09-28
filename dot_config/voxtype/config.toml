@@ -40,7 +40,7 @@ volume = 0.6
 # .en models are English-only but faster and more accurate for English
 # large-v3-turbo is faster than large-v3 with minimal accuracy loss (recommended for GPU)
 # Or provide absolute path to a custom .bin model file
-model = "{{ .chezmoi.homeDir }}/.local/share/voxtype/models/ggml-large-v3-q5_0.bin"
+model = "large-v3"
 
 # Language for transcription
 # Use "en" for English, "auto" for auto-detection
@@ -53,7 +53,6 @@ translate = false
 # Initial-Prompt: lenkt Groß-/Kleinschreibung, Satzzeichen und Fachbegriffe.
 # Übernommen aus der alten hyprwhspr-Konfiguration.
 initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschreibung, Satzzeichen, Eigennamen und gängigen Fachbegriffen wie AI-Brain, Omarchy, Hyprland, chezmoi, yazi, voxtype, Peppermint."
-flash_attention = true
 
 # Number of CPU threads for inference (omit for auto-detection)
 # threads = 4
