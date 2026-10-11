@@ -25,9 +25,8 @@ require("default.hypr.toggles")
 -- was darüber hinausgeht.
 {{ if eq .machine "desktop" -}}
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
-o.window("^([Gg]oogle-chrome)$", { workspace = "1" }) -- DP-3, links
+o.window("^chromium$", { workspace = "1" }) -- DP-3, links
 o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" }) -- DP-2, Mitte
-o.window({ title = "^Ghostty-WS4$" }, { workspace = "4" }) -- DP-2, Mitte
 
 -- Manuell gestartete Apps
 o.window("^obsidian$", { workspace = "4" })

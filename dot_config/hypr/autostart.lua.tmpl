@@ -10,17 +10,14 @@ o.exec_on_start(
 -- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
 -- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
 o.exec_on_start(
-  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "4" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "1" })']]
+  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "1" })']]
 )
 
--- Workspace 1 (DP-3, links): Chrome
-o.exec_on_start("sleep 2 && uwsm app -- google-chrome-stable")
+-- Workspace 1 (DP-3, links): Chromium (über die .desktop-Datei, wie im Menü)
+o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
 
 -- Workspace 2 (DP-2, Mitte): Ghostty
 o.exec_on_start("sleep 4 && uwsm app -- ghostty --title=Ghostty-WS2")
-
--- Workspace 4 (DP-2, Mitte): Ghostty
-o.exec_on_start("sleep 6 && uwsm app -- ghostty --title=Ghostty-WS4")
 {{- else if eq .machine "laptop" -}}
 -- Netzlaufwerk mounten (wartet auf Netbird + Server erreichbar)
 o.exec_on_start(
