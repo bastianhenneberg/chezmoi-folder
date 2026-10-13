@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<FileZilla3 version="3.70.4" platform="*nix">
-	<Layout Builddate="2026-04-19" Buildtime="21:44:37">
+<FileZilla3 version="3.70.5" platform="*nix">
+	<Layout Builddate="2026-05-10" Buildtime="16:54:47">
 		<Resources />
-		<Language id="en_US" date="1776635077">
+		<Language id="en_US" date="1778432087">
 			<Font font="Adwaita Sans 11" width="903" height="19" />
 		</Language>
 	</Layout>
