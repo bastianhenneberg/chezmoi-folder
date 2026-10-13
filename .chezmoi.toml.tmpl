@@ -1,0 +1,23 @@
+{{/*
+  Erzeugt ~/.config/chezmoi/chezmoi.toml bei `chezmoi init`.
+
+  Fragt einmal, welcher Rechner das ist — zehn Templates verzweigen auf .machine
+  und brechen ohne den Wert ab. Die Antwort bleibt gespeichert, ein spaeteres
+  `chezmoi init` fragt nicht erneut.
+
+  Ohne Terminal (Skript, Container) den Wert mitgeben:
+    chezmoi init --apply --promptChoice machine=laptop bastianhenneberg/chezmoi-folder
+
+  Der age-Schluessel kommt NICHT aus dem Repo: ~/.config/chezmoi/key.txt liegt in
+  Passbolt und muss vor `chezmoi apply` dort liegen, sonst lassen sich die
+  SSH-Keys nicht entschluesseln.
+*/ -}}
+{{- $machine := promptChoiceOnce . "machine" "machine" (list "laptop" "desktop" "omarchy") -}}
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1stzrj3fh35plhqxmn8r2j9534eqm52s3hmqgrx8vv753waj50s4szqhwtd"
+
+[data]
+    machine = {{ $machine | quote }}
