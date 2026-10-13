@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Installiert die Pakete, auf die die Configs in diesem Repo zeigen — nur, was
+# Omarchy nicht ohnehin mitbringt (neovim, lazygit, chromium, …).
+#
+# Laeuft VOR dem Ausrollen der Dateien (run_..._before_), damit z.B. das hyprwhspr-
+# Skript sein Paket schon vorfindet. run_onchange_: erneuter Lauf nur, wenn sich
+# diese Datei aendert — eine neue Zeile in der Liste reicht dafuer.
+# Idempotent: --needed ueberspringt, was schon installiert ist.
+#
+# Braucht sudo (yay fragt selbst). Auf einem Rechner ohne yay (kein Omarchy)
+# bricht es nicht ab, sondern sagt, was fehlt.
+set -euo pipefail
+
+PAKETE=(
+    # Shell: .zshrc laedt oh-my-zsh, oh-my-posh und zoxide
+    zsh zoxide oh-my-posh
+    # chezmoi selbst: verschluesselte Dateien (SSH-Keys, FileZilla)
+    age
+    # Terminal + Werkzeuge aus Keybinds und Skripten
+    ghostty yazi tmux jq xdotool tigervnc github-cli
+    # Editoren und Programme mit eigener Config im Repo
+    emacs-wayland filezilla
+    # Schriften: kitty und Ghostty nutzen Victor Mono
+    ttf-victor-mono ttf-victor-mono-nerd
+    # Diktat: beides installiert, dictation-switch waehlt eines aus
+    voxtype-bin hyprwhspr wtype ydotool
+{{- if eq .machine "laptop" }}
+    # ASUS Zephyrus: Luefter, GPU-Umschaltung
+    asusctl supergfxctl rog-control-center
+{{- end }}
+)
+
+if ! command -v yay >/dev/null 2>&1; then
+    echo "[pakete] yay nicht gefunden — bitte von Hand installieren:"
+    printf '  %s\n' "${PAKETE[@]}"
+    exit 0
+fi
+
+# Nur nach sudo fragen, wenn wirklich etwas fehlt. pacman -T nennt die fehlenden.
+mapfile -t FEHLEND < <(pacman -T "${PAKETE[@]}" || true)
+if [ "${#FEHLEND[@]}" -gt 0 ]; then
+    echo "[pakete] Installiere ${#FEHLEND[@]} fehlende Pakete: ${FEHLEND[*]}"
+    yay -S --needed --noconfirm "${FEHLEND[@]}"
+else
+    echo "[pakete] Alle ${#PAKETE[@]} Pakete schon installiert."
+fi
+
+# oh-my-zsh und die Plugins aus .zshrc (plugins=(...)) sind Git-Checkouts, keine
+# Pakete. Nur klonen, wenn sie fehlen — bestehende nicht anfassen, oh-my-zsh
+# aktualisiert sich selbst.
+ZSH_DIR="$HOME/.oh-my-zsh"
+if [ ! -d "$ZSH_DIR" ]; then
+    git clone --depth 1 https://github.com/ohmyzsh/ohmyzsh.git "$ZSH_DIR"
+fi
+klone_plugin() {
+    local ziel="$ZSH_DIR/custom/plugins/$1"
+    [ -d "$ziel" ] || git clone --depth 1 "$2" "$ziel"
+}
+klone_plugin zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions.git
+klone_plugin zsh-syntax-highlighting https://github.com/zsh-users/zsh-syntax-highlighting.git
+klone_plugin fast-syntax-highlighting https://github.com/zdharma-continuum/fast-syntax-highlighting.git
+klone_plugin zsh-autocomplete https://github.com/marlonrichert/zsh-autocomplete.git
+
+# Login-Shell: Omarchy setzt bash, die Config hier lebt in .zshrc.
+if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
+    echo "[pakete] Login-Shell auf zsh umstellen ..."
+    sudo chsh -s /usr/bin/zsh "$USER"
+fi
