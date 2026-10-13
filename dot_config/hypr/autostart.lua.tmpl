@@ -24,22 +24,14 @@ o.exec_on_start(
   "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
 )
 
--- Workspaces auf externem Monitor erstellen.
+-- Workspace auf externem Monitor erstellen.
 -- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
 -- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
-o.exec_on_start(
-  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "4" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "5" })']]
-)
+o.exec_on_start([[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })']])
 
 -- Workspace 1 (eDP-2): Chromium — über die .desktop-Datei, damit der
 -- Wrapper (~/.local/bin/chromium-wrapper, LIBVA_DRIVER_NAME=radeonsi) greift.
 o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
-
--- Workspace 5 (HDMI-A-1): Thunderbird
-o.exec_on_start("sleep 3 && uwsm app -- thunderbird")
-
--- Workspace 4 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
-o.exec_on_start("sleep 5 && uwsm app -- ghostty --title=Ghostty-WS4")
 
 -- Workspace 2 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
 o.exec_on_start("sleep 8 && uwsm app -- ghostty --title=Ghostty-WS2")
