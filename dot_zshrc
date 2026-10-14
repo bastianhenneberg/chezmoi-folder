@@ -138,3 +138,6 @@ function y() {
 
 # Doom Emacs: `doom`-CLI (doom sync / doom doctor / doom upgrade) verfügbar machen
 export PATH="$HOME/.config/emacs/bin:$PATH"
+
+# Vom uv/astral-Installer angehaengt, abgesichert (gilt fuer alle Rechner).
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"

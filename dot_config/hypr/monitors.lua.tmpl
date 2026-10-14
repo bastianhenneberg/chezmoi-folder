@@ -55,9 +55,10 @@ hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "a
 hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
 hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
 {{- else if eq .machine "omarchy" -}}
--- omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), HiDPI Auto-Detect
-hl.env("GDK_SCALE", "2")
-hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
+-- omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), feste Skalierung
+-- 1.25 (vor Ort so eingestellt, Auto-Detect mit GDK_SCALE 2 war zu gross)
+hl.env("GDK_SCALE", "1")
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.25 })
 {{- else -}}
 {{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end }}
