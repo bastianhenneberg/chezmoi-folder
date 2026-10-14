@@ -17,9 +17,12 @@ PAKETE=(
     # chezmoi selbst: verschluesselte Dateien (SSH-Keys, FileZilla)
     age
     # Terminal + Werkzeuge aus Keybinds und Skripten
-    ghostty yazi tmux jq xdotool tigervnc github-cli
-    # Editoren und Programme mit eigener Config im Repo
-    emacs-wayland filezilla
+    ghostty tmux jq xdotool github-cli
+{{- if ne .machine "omarchy" }}
+    # Dateimanager, Editor, FTP und VNC nur an den Arbeitsplaetzen, nicht auf
+    # codingmachine (omarchy), die nur Agents laufen laesst
+    yazi emacs-wayland filezilla tigervnc
+{{- end }}
     # Schriften: kitty und Ghostty nutzen Victor Mono
     ttf-victor-mono ttf-victor-mono-nerd
     # Diktat: beides installiert, dictation-switch waehlt eines aus
