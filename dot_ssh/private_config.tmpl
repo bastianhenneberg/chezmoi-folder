@@ -7,8 +7,25 @@ Host *
     ConnectTimeout 10
     IPQoS none
     ControlMaster auto
-    ControlPersist 10m
+    # `yes` statt einer Frist: Die Verbindung bleibt offen, bis sie
+    # ausdruecklich geschlossen wird (`ssh -O exit <alias>`). Mit 10m
+    # fiel der Master mitten in laengeren Sitzungen weg, und der
+    # naechste Aufruf baute neu auf — genau die Verbindungen, die auf
+    # den infra-monitor-Hosts fail2ban ausloesen.
+    ControlPersist yes
     ControlPath ~/.ssh/cm/%r@%h:%p
+
+Host purple-stream-monitor
+    HostName 188.34.187.56
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host purple-stream
+    HostName 188.34.187.56
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
 
 Host github.com
     User git
@@ -121,7 +138,97 @@ Host moonlit-winds 178.104.193.196
     User infra-monitor
     IdentityFile ~/.ssh/infra-monitor
     IdentitiesOnly yes
-{{- else if or (eq .machine "laptop") (eq .machine "desktop") -}}
+
+Host breezy-star
+    HostName 46.224.124.91
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host beautiful-fire
+    HostName 49.13.80.161
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
+
+Host coolify
+    HostName 188.245.53.38
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host mail-machine 2.28.109.241
+    HostName 2.28.109.241
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host jubilant-sunrise
+    HostName 188.245.157.118
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+# scenic-badlands — Forge-Server (shop.crewtex.de)
+Host scenic-badlands
+    HostName 91.99.142.104
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
+
+Host pve proxmox 100.97.188.226
+    HostName 100.97.188.226
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host backup-server truenas-backup 192.168.1.35
+    HostName 192.168.1.35
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host truenas-graphics 192.168.1.25
+    HostName 192.168.1.25
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host nextcloudaio 100.97.102.91
+    HostName 100.97.102.91
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host passbolt 100.97.19.146
+    HostName 100.97.19.146
+    User infra-monitor
+    Port 22
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
+Host breezy-star-forge
+    HostName 46.224.124.91
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
+
+# imkr: die anderen eigenen Rechner, per NetBird. Der Laptop heisst in
+# imkr `omarchy` (dieser Rechner hat denselben Hostnamen, daher der Eintrag).
+Host omarchy
+    HostName 100.97.56.232
+    User bastian
+    IdentityFile ~/.ssh/id_ed25519
+
+Host desktop
+    HostName 100.97.213.113
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+{{- else if eq .machine "laptop" -}}
 Host github.com
     User git
     IdentityFile ~/.ssh/arch-linux-mobile
@@ -231,6 +338,133 @@ Host 178.104.193.196
 Host 91.99.142.104
     User forge
     IdentityFile ~/.ssh/arch-linux-mobile
+
+# imkr: der Desktop, per NetBird
+Host desktop
+    HostName 100.97.213.113
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+{{- else if eq .machine "desktop" -}}
+Host github.com
+    User git
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 49.12.226.60
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.103.165
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.53.201
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.53.38
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.34.187.56
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.34.187.56
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.108.113
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 167.235.140.33
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 159.69.214.162
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 116.203.235.145
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 157.180.39.64
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 91.99.17.155
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 49.13.80.161
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 88.198.192.86
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 188.245.157.118
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 46.224.124.91
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host kiserver
+    HostName 192.168.1.147
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 192.168.1.147
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 100.97.10.160
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host codingmachine
+    HostName 100.97.97.130
+    User codingmachine
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 100.97.97.130
+    User codingmachine
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 178.104.42.244
+    User root
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 178.104.23.247
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 46.225.26.43
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 178.104.193.196
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+Host 91.99.142.104
+    User forge
+    IdentityFile ~/.ssh/arch-linux-mobile
+
+# imkr: der Laptop, per NetBird
+Host omarchy
+    HostName 100.97.56.232
+    User bastian
+    IdentityFile ~/.ssh/id_ed25519
 
 Host *
     ControlMaster auto
