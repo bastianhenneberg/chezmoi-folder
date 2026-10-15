@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Gibt Agenten auf einem entfernten Rechner den Browser dieses Rechners.
+#   agent-tunnel [host] [port]     (Standard: codingmachine 9222)
+# Startet Chromium mit eigenem Profil und Remote-Debugging (nie das Hauptprofil:
+# der Port gibt volle Kontrolle über diesen Browser) und hält einen SSH-Rückwärtstunnel.
+# Auf dem Host zeigt 127.0.0.1:<port> dann auf diesen Browser:
+#   agent-browser --cdp <port> …, MCPs playwright-laptop / chrome-devtools-laptop.
+# Ctrl+C beendet Tunnel und Browser.
+set -u
+
+HOST="${1:-codingmachine}"
+PORT="${2:-9222}"
+PROFILE="$HOME/.cache/agent-chrome"
+BROWSER="$(command -v chromium || command -v google-chrome-stable || command -v google-chrome)" \
+  || { echo "agent-tunnel: kein Chromium/Chrome gefunden" >&2; exit 1; }
+
+# Läuft schon ein Tunnel von einem anderen Rechner, gehört der Port dort ihm.
+if ssh -o BatchMode=yes "$HOST" "curl -s -m 2 http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
+  echo "agent-tunnel: Port $PORT auf $HOST ist schon belegt (Tunnel von einem anderen Rechner?)." >&2
+  echo "Dort agent-tunnel beenden oder einen anderen Port wählen: agent-tunnel $HOST <port>" >&2
+  exit 1
+fi
+
+started=""
+if ! curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
+  "$BROWSER" --remote-debugging-port="$PORT" --user-data-dir="$PROFILE" \
+    --no-first-run --no-default-browser-check about:blank >/dev/null 2>&1 &
+  started=$!
+  for _ in $(seq 1 50); do
+    curl -s -m 1 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1 && break
+    sleep 0.2
+  done
+fi
+curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1 \
+  || { echo "agent-tunnel: Browser antwortet nicht auf Port $PORT" >&2; [ -n "$started" ] && kill "$started"; exit 1; }
+
+cleanup() { [ -n "$started" ] && kill "$started" 2>/dev/null; }
+trap cleanup EXIT INT TERM
+
+echo "agent-tunnel: Browser von $(hostname) → $HOST:127.0.0.1:$PORT (Ctrl+C beendet)"
+# Eigene Verbindung statt ControlMaster: sonst überlebt die Weiterleitung Ctrl+C.
+ssh -N -o ControlMaster=no -o ControlPath=none \
+  -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
+  -R "$PORT:127.0.0.1:$PORT" "$HOST"
