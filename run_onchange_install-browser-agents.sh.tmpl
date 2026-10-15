@@ -4,6 +4,8 @@
 #   - Playwright MCP: Standard für UI-Tests und Flows
 #   - Chrome DevTools MCP: Console, Network, Performance, Lighthouse
 # Registriert die MCPs in jedem imkr-Claude-Account, im Standard-Claude-Config und in Codex.
+# Auf der codingmachine (.machine = omarchy) zusätzlich playwright-tunnel / chrome-devtools-tunnel:
+# sie nutzen den Browser von Laptop oder Desktop, den dort `agent-tunnel` freigibt.
 # Idempotent; läuft erneut, sobald sich diese Datei ändert.
 set -u
 
@@ -46,6 +48,12 @@ if command -v claude >/dev/null; then
       || env "${env[@]}" claude mcp add -s user playwright -- npx -y @playwright/mcp@latest "${PW_ARGS[@]}" >/dev/null 2>&1
     env "${env[@]}" claude mcp get chrome-devtools >/dev/null 2>&1 \
       || env "${env[@]}" claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest "${DT_ARGS[@]}" >/dev/null 2>&1
+{{- if eq .machine "omarchy" }}
+    env "${env[@]}" claude mcp get playwright-tunnel >/dev/null 2>&1 \
+      || env "${env[@]}" claude mcp add -s user playwright-tunnel -- npx -y @playwright/mcp@latest --cdp-endpoint http://127.0.0.1:9222 >/dev/null 2>&1
+    env "${env[@]}" claude mcp get chrome-devtools-tunnel >/dev/null 2>&1 \
+      || env "${env[@]}" claude mcp add -s user chrome-devtools-tunnel -- npx -y chrome-devtools-mcp@latest --browserUrl http://127.0.0.1:9222 >/dev/null 2>&1
+{{- end }}
     echo "browser-agents: Claude ${d:-~/.claude} eingerichtet"
   done
 fi
@@ -56,6 +64,12 @@ if command -v codex >/dev/null; then
     || codex mcp add playwright -- npx -y @playwright/mcp@latest "${PW_ARGS[@]}" >/dev/null 2>&1
   codex mcp get chrome-devtools >/dev/null 2>&1 \
     || codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest "${DT_ARGS[@]}" >/dev/null 2>&1
+{{- if eq .machine "omarchy" }}
+  codex mcp get playwright-tunnel >/dev/null 2>&1 \
+    || codex mcp add playwright-tunnel -- npx -y @playwright/mcp@latest --cdp-endpoint http://127.0.0.1:9222 >/dev/null 2>&1
+  codex mcp get chrome-devtools-tunnel >/dev/null 2>&1 \
+    || codex mcp add chrome-devtools-tunnel -- npx -y chrome-devtools-mcp@latest --browserUrl http://127.0.0.1:9222 >/dev/null 2>&1
+{{- end }}
   echo "browser-agents: Codex eingerichtet"
 fi
 exit 0
