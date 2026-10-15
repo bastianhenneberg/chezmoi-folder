@@ -141,3 +141,6 @@ export PATH="$HOME/.config/emacs/bin:$PATH"
 
 # Vom uv/astral-Installer angehaengt, abgesichert (gilt fuer alle Rechner).
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# imkr: Tab completion for its commands, sessions and hosts (needs compinit, done by oh-my-zsh above)
+command -v imkr >/dev/null 2>&1 && eval "$(imkr completions zsh 2>/dev/null)"
