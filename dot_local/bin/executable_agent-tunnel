@@ -34,11 +34,19 @@ fi
 curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1 \
   || { echo "agent-tunnel: Browser antwortet nicht auf Port $PORT" >&2; [ -n "$started" ] && kill "$started"; exit 1; }
 
-cleanup() { [ -n "$started" ] && kill "$started" 2>/dev/null; }
-trap cleanup EXIT INT TERM
+tunnel=""
+cleanup() {
+  [ -n "$tunnel" ] && kill "$tunnel" 2>/dev/null
+  [ -n "$started" ] && kill "$started" 2>/dev/null
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM HUP
 
 echo "agent-tunnel: Browser von $(hostname) → $HOST:127.0.0.1:$PORT (Ctrl+C beendet)"
 # Eigene Verbindung statt ControlMaster: sonst überlebt die Weiterleitung Ctrl+C.
+# Im Hintergrund + wait, damit Signale sofort aufräumen und nicht erst nach ssh.
 ssh -N -o ControlMaster=no -o ControlPath=none \
   -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
-  -R "$PORT:127.0.0.1:$PORT" "$HOST"
+  -R "$PORT:127.0.0.1:$PORT" "$HOST" &
+tunnel=$!
+wait "$tunnel"
