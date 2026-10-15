@@ -11,9 +11,11 @@ command -v npm >/dev/null || { echo "browser-agents: npm fehlt, übersprungen"; 
 
 BROWSER="$(command -v chromium || command -v google-chrome-stable || command -v google-chrome || true)"
 
-# agent-browser (ohne root: bei schreibgeschütztem npm-Prefix nach ~/.local)
+# agent-browser (ohne root: npm-Prefix schreibgeschützt oder nicht im PATH → ~/.local)
 NPM_PREFIX=()
-[ -w "$(npm config get prefix)/lib" ] || NPM_PREFIX=(--prefix "$HOME/.local")
+p="$(npm config get prefix)"
+[ -w "$p/lib" ] && case ":$PATH:" in *":$p/bin:"*) ;; *) false ;; esac \
+  || NPM_PREFIX=(--prefix "$HOME/.local")
 npm i -g "${NPM_PREFIX[@]}" --allow-scripts=agent-browser agent-browser@latest >/dev/null 2>&1 \
   && echo "browser-agents: $(agent-browser --version 2>/dev/null)" \
   || echo "browser-agents: agent-browser-Installation fehlgeschlagen"
