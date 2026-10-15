@@ -54,6 +54,11 @@ if command -v claude >/dev/null; then
     env "${env[@]}" claude mcp get chrome-devtools-tunnel >/dev/null 2>&1 \
       || env "${env[@]}" claude mcp add -s user chrome-devtools-tunnel -- npx -y chrome-devtools-mcp@latest --browserUrl http://127.0.0.1:9222 >/dev/null 2>&1
 {{- end }}
+    # Claude in Chrome nicht mehr standardmäßig: ersetzt durch die Werkzeuge oben.
+    cfg="${d:-$HOME}/.claude.json"
+    if [ -f "$cfg" ] && command -v jq >/dev/null; then
+      tmp="$(mktemp "$cfg.XXXX")" && jq '.claudeInChromeDefaultEnabled = false' "$cfg" > "$tmp" && mv "$tmp" "$cfg" || rm -f "$tmp"
+    fi
     echo "browser-agents: Claude ${d:-~/.claude} eingerichtet"
   done
 fi
