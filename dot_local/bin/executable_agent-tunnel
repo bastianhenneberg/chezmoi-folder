@@ -1,28 +1,158 @@
 #!/usr/bin/env bash
-# Gibt Agenten auf einem entfernten Rechner den Browser dieses Rechners.
-#   agent-tunnel [host] [port]     (Standard: codingmachine 9222)
-# Startet Chromium mit eigenem Profil und Remote-Debugging (nie das Hauptprofil:
-# der Port gibt volle Kontrolle über diesen Browser) und hält einen SSH-Rückwärtstunnel.
-# Auf dem Host zeigt 127.0.0.1:<port> dann auf diesen Browser:
-#   agent-browser --cdp <port> …, MCPs playwright-laptop / chrome-devtools-laptop.
+# Gibt Agenten auf einem entfernten Rechner den Browser des Rechners, an dem
+# Bastian sitzt.
+#
+#   agent-tunnel [start] [--from RECHNER] [--to HOST] [--port N]
+#   agent-tunnel status | stop [--from RECHNER] [--port N]
+#
+# Am eigenen Bildschirm gestartet: Chromium mit eigenem Profil und
+# Remote-Debugging (nie das Hauptprofil: der Port gibt volle Kontrolle über
+# diesen Browser) plus SSH-Rückwärtstunnel zu HOST (Standard codingmachine).
 # Ctrl+C beendet Tunnel und Browser.
+#
+# Vom Agent auf HOST gestartet (kein Bildschirm, z. B. per SSH): findet den
+# Rechner, an dem Bastian sitzt (--from, sonst `imkr operator`, sonst die
+# SSH-Verbindung, über die er hier ist), startet den Tunnel dort im
+# Hintergrund auf dessen Bildschirm und wartet, bis der Browser antwortet.
+# Danach zeigt 127.0.0.1:<port> hier auf diesen Browser:
+#   agent-browser --cdp <port> …, MCPs playwright-laptop / chrome-devtools-laptop.
 set -u
 
-HOST="${1:-codingmachine}"
-PORT="${2:-9222}"
+ACTION=start
+case "${1:-}" in start|status|stop) ACTION=$1; shift ;; esac
+FROM="" HOST="" PORT=9222 DETACH=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --from) FROM="$2"; shift 2 ;;
+    --to) HOST="$2"; shift 2 ;;
+    --port) PORT="$2"; shift 2 ;;
+    --detach) DETACH=1; shift ;;
+    -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "agent-tunnel: unbekannte Option $1 (siehe --help)" >&2; exit 2 ;;
+    # Früher: agent-tunnel [host] [port]
+    *) if [ -z "$HOST" ]; then HOST="$1"; else PORT="$1"; fi; shift ;;
+  esac
+done
+# Ein Profil je Port: zwei Tunnel sind zwei Browser, nie dasselbe Profil.
 PROFILE="$HOME/.cache/agent-chrome"
+[ "$PORT" = 9222 ] || PROFILE="$PROFILE-$PORT"
+PIDFILE="$HOME/.cache/agent-tunnel-$PORT.pid"
+LOG="$HOME/.cache/agent-tunnel-$PORT.log"
+browser_answers() { curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; }
+running_here() { [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; }
+
+# Ein Bildschirm hier: grafische Sitzung und nicht über SSH angemeldet.
+has_screen() { [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ] && [ -z "${SSH_CONNECTION:-}" ]; }
+
+# Über SSH gestartet: die grafische Sitzung des Users auf diesem Rechner nehmen.
+use_session_screen() {
+  export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  local sock
+  for sock in "$XDG_RUNTIME_DIR"/wayland-*; do
+    case "$sock" in *.lock) continue ;; esac
+    [ -S "$sock" ] && { export WAYLAND_DISPLAY="${sock##*/}"; break; }
+  done
+  export DISPLAY="${DISPLAY:-:0}"
+  [ -n "${WAYLAND_DISPLAY:-}" ] || [ -S /tmp/.X11-unix/X0 ]
+}
+
+# Der SSH-Name eines Rechners zu einer Adresse, aus ~/.ssh/config.
+ssh_name_of() {
+  local ip=$1 name
+  for name in $(awk 'tolower($1)=="host"{for(i=2;i<=NF;i++) if ($i !~ /[*?]/) print $i}' ~/.ssh/config 2>/dev/null); do
+    [ "$(ssh -G "$name" 2>/dev/null | awk '$1=="hostname"{print $2}')" = "$ip" ] && { echo "$name"; return; }
+  done
+  echo "$ip"
+}
+
+# Wo Bastian sitzt und unter welchem Namen jener Rechner diesen erreicht.
+find_operator() {
+  local json
+  if [ -z "$FROM" ] && command -v imkr >/dev/null && json=$(imkr operator --json 2>/dev/null); then
+    FROM=$(printf '%s' "$json" | sed -n 's/.*"machine": *"\([^"]*\)".*/\1/p')
+    [ -z "$HOST" ] && HOST=$(printf '%s' "$json" | sed -n 's/.*"via": *"\([^"]*\)".*/\1/p')
+  fi
+  if [ -z "$FROM" ] && [ -n "${SSH_CONNECTION:-}" ]; then
+    FROM=$(ssh_name_of "${SSH_CONNECTION%% *}")
+  fi
+  if [ -z "$FROM" ]; then
+    echo "agent-tunnel: Hier ist kein Bildschirm, und ich weiß nicht, an welchem Rechner Bastian sitzt." >&2
+    echo "Bitte ihn fragen und dann: agent-tunnel --from RECHNER (z. B. laptop, desktop)" >&2
+    exit 1
+  fi
+  if [ -z "$HOST" ]; then
+    HOST=$(sed -n 's/^name *= *"\([^"]*\)".*/\1/p' "${IMKR_CONFIG:-$HOME/.config/imkr/config.toml}" 2>/dev/null | head -n 1)
+    HOST=${HOST:-$(hostname)}
+  fi
+}
+
+# ---- Vom Agent ohne Bildschirm: über den Rechner des Users ----
+if ! has_screen && [ -z "$DETACH" ]; then
+  find_operator
+  case "$ACTION" in
+    start)
+      if browser_answers; then
+        echo "agent-tunnel: läuft schon, 127.0.0.1:$PORT zeigt auf einen Browser"; exit 0
+      fi
+      echo "agent-tunnel: starte den Browser auf $FROM, Tunnel nach $HOST:$PORT …"
+      ssh -o BatchMode=yes "$FROM" "\$HOME/.local/bin/agent-tunnel start --detach --to '$HOST' --port '$PORT'" || {
+        echo "agent-tunnel: auf $FROM ging es nicht (siehe oben). Ist agent-tunnel dort installiert?" >&2
+        exit 1
+      }
+      for _ in $(seq 1 75); do browser_answers && break; sleep 0.2; done
+      if browser_answers; then
+        echo "agent-tunnel: bereit, der Browser von $FROM ist hier unter 127.0.0.1:$PORT (agent-browser --cdp $PORT)"
+      else
+        echo "agent-tunnel: der Tunnel steht nicht, Log auf $FROM: $LOG" >&2; exit 1
+      fi
+      ;;
+    status|stop) exec ssh -o BatchMode=yes "$FROM" "\$HOME/.local/bin/agent-tunnel $ACTION --detach --port '$PORT'" ;;
+  esac
+  exit
+fi
+
+# ---- Hier, am Bildschirm des Users ----
+case "$ACTION" in
+  status)
+    if running_here; then echo "agent-tunnel: läuft auf $(hostname) (pid $(cat "$PIDFILE")), Port $PORT"
+    else echo "agent-tunnel: läuft nicht auf $(hostname)"; exit 1; fi
+    exit 0 ;;
+  stop)
+    if running_here; then kill "$(cat "$PIDFILE")"; echo "agent-tunnel: auf $(hostname) beendet"
+    else echo "agent-tunnel: lief nicht auf $(hostname)"; fi
+    exit 0 ;;
+esac
+HOST="${HOST:-codingmachine}"
+
+if [ -n "$DETACH" ]; then
+  if running_here; then echo "agent-tunnel: läuft schon auf $(hostname)"; exit 0; fi
+  has_screen || use_session_screen || {
+    echo "agent-tunnel: auf $(hostname) ist niemand grafisch angemeldet" >&2; exit 1
+  }
+  unset SSH_CONNECTION SSH_CLIENT SSH_TTY
+  setsid nohup "$0" start --to "$HOST" --port "$PORT" >"$LOG" 2>&1 </dev/null &
+  for _ in $(seq 1 50); do running_here && break; sleep 0.2; done
+  running_here || { echo "agent-tunnel: Start auf $(hostname) fehlgeschlagen:" >&2; cat "$LOG" >&2; exit 1; }
+  echo "agent-tunnel: Browser auf $(hostname) gestartet (Log: $LOG)"
+  exit 0
+fi
+
+if running_here; then
+  echo "agent-tunnel: läuft schon (pid $(cat "$PIDFILE")); beenden mit: agent-tunnel stop" >&2; exit 1
+fi
 BROWSER="$(command -v chromium || command -v google-chrome-stable || command -v google-chrome)" \
   || { echo "agent-tunnel: kein Chromium/Chrome gefunden" >&2; exit 1; }
 
 # Läuft schon ein Tunnel von einem anderen Rechner, gehört der Port dort ihm.
 if ssh -o BatchMode=yes "$HOST" "curl -s -m 2 http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
   echo "agent-tunnel: Port $PORT auf $HOST ist schon belegt (Tunnel von einem anderen Rechner?)." >&2
-  echo "Dort agent-tunnel beenden oder einen anderen Port wählen: agent-tunnel $HOST <port>" >&2
+  echo "Dort agent-tunnel stop oder einen anderen Port wählen: agent-tunnel --port <port>" >&2
   exit 1
 fi
 
+echo $$ >"$PIDFILE"
 started=""
-if ! curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
+if ! browser_answers; then
   # A lock left by a browser that is gone, or by this machine under an old
   # hostname, makes Chromium ask "Unlock profile and relaunch". The profile
   # belongs to this script alone, so a lock without its browser can go.
@@ -33,23 +163,21 @@ if ! curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
   "$BROWSER" --remote-debugging-port="$PORT" --user-data-dir="$PROFILE" \
     --no-first-run --no-default-browser-check about:blank >/dev/null 2>&1 &
   started=$!
-  for _ in $(seq 1 50); do
-    curl -s -m 1 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1 && break
-    sleep 0.2
-  done
+  for _ in $(seq 1 50); do browser_answers && break; sleep 0.2; done
 fi
-curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1 \
-  || { echo "agent-tunnel: Browser antwortet nicht auf Port $PORT" >&2; [ -n "$started" ] && kill "$started"; exit 1; }
+browser_answers \
+  || { echo "agent-tunnel: Browser antwortet nicht auf Port $PORT" >&2; [ -n "$started" ] && kill "$started"; rm -f "$PIDFILE"; exit 1; }
 
 tunnel=""
 cleanup() {
   [ -n "$tunnel" ] && kill "$tunnel" 2>/dev/null
   [ -n "$started" ] && kill "$started" 2>/dev/null
+  [ "$(cat "$PIDFILE" 2>/dev/null)" = "$$" ] && rm -f "$PIDFILE"
 }
 trap cleanup EXIT
 trap 'exit 130' INT TERM HUP
 
-echo "agent-tunnel: Browser von $(hostname) → $HOST:127.0.0.1:$PORT (Ctrl+C beendet)"
+echo "agent-tunnel: Browser von $(hostname) → $HOST:127.0.0.1:$PORT (Ctrl+C oder agent-tunnel stop beendet)"
 # Eigene Verbindung statt ControlMaster: sonst überlebt die Weiterleitung Ctrl+C.
 # Im Hintergrund + wait, damit Signale sofort aufräumen und nicht erst nach ssh.
 ssh -N -o ControlMaster=no -o ControlPath=none \
