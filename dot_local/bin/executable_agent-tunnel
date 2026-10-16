@@ -130,7 +130,23 @@ case "$ACTION" in
     fi
     exit 1 ;;
   stop)
-    if running_here; then kill "$(cat "$PIDFILE")"; echo "agent-tunnel: auf $(hostname) beendet"
+    if running_here; then kill "$(cat "$PIDFILE")"; echo "agent-tunnel: auf $(hostname) beendet"; exit 0; fi
+    # Ein Tunnel ohne Merker: von einer älteren Fassung oder ohne Terminal
+    # gestartet. Nur Läufe dieses Skripts für diesen Port, nie status/stop.
+    found=""
+    for pid in $(pgrep -f 'agent-tunnel'); do
+      [ "$pid" = "$$" ] && continue
+      args=$(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null) || continue
+      case "$args" in bash\ *agent-tunnel*) ;; *) continue ;; esac
+      case "$args" in *" status"*|*" stop"*|*"--detach"*) continue ;; esac
+      case "$args" in
+        *"--port $PORT"*|*" $PORT "*) ;;
+        *"--port "*) continue ;;
+        *) [ "$PORT" = 9222 ] || continue ;;
+      esac
+      kill "$pid" && found=1
+    done
+    if [ -n "$found" ]; then echo "agent-tunnel: auf $(hostname) beendet (ohne Merker gestartet)"
     else echo "agent-tunnel: lief nicht auf $(hostname)"; fi
     exit 0 ;;
 esac
