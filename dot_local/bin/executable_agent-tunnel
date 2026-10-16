@@ -81,7 +81,8 @@ find_operator() {
     exit 1
   fi
   if [ -z "$HOST" ]; then
-    HOST=$(sed -n 's/^name *= *"\([^"]*\)".*/\1/p' "${IMKR_CONFIG:-$HOME/.config/imkr/config.toml}" 2>/dev/null | head -n 1)
+    # Nur die oberste Ebene: `name` steht auch in [[commands]] und anderen Tabellen.
+    HOST=$(sed -n '/^\[/q; s/^name *= *"\([^"]*\)".*/\1/p' "${IMKR_CONFIG:-$HOME/.config/imkr/config.toml}" 2>/dev/null)
     HOST=${HOST:-$(hostname)}
   fi
 }
