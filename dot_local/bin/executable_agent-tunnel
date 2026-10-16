@@ -23,6 +23,13 @@ fi
 
 started=""
 if ! curl -s -m 2 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
+  # A lock left by a browser that is gone, or by this machine under an old
+  # hostname, makes Chromium ask "Unlock profile and relaunch". The profile
+  # belongs to this script alone, so a lock without its browser can go.
+  lock="$(readlink "$PROFILE/SingletonLock" 2>/dev/null)"
+  if [ -n "$lock" ] && { [ "${lock%-*}" != "$(hostname)" ] || ! kill -0 "${lock##*-}" 2>/dev/null; }; then
+    rm -f "$PROFILE/SingletonLock" "$PROFILE/SingletonCookie" "$PROFILE/SingletonSocket"
+  fi
   "$BROWSER" --remote-debugging-port="$PORT" --user-data-dir="$PROFILE" \
     --no-first-run --no-default-browser-check about:blank >/dev/null 2>&1 &
   started=$!
