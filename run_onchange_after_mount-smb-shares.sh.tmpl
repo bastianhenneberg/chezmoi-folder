@@ -10,8 +10,11 @@
 # "Oeffnen mit" eine smb://-Adresse und kann nichts damit anfangen (19.10.2026).
 #
 # x-systemd.automount: eingebunden wird erst beim ersten Zugriff. Ist der Server
-# nicht erreichbar (Grafikserver: nur im Buero-LAN), bootet der Rechner trotzdem
-# (nofail), und ein Zugriff gibt nach 10 s auf statt zu haengen.
+# nicht erreichbar, bootet der Rechner trotzdem (nofail), und ein Zugriff gibt
+# nach 10 s auf statt zu haengen.
+# Beide Server ueber ihre NetBird-Adresse — die gilt im Buero, zu Hause und
+# unterwegs. Die LAN-IP des Grafikservers (192.168.1.25) erreicht z.B. der
+# Desktop nicht, er steht in einem anderen Netz.
 #
 # Codingmachine und graphics: dort laufen Agents mit sudo. Deshalb ein eigener
 # TrueNAS-Benutzer codingmachine-ro, den der Server selbst auf Lesen beschraenkt
@@ -80,11 +83,11 @@ einbinden() {
 {{ if ne .machine "omarchy" -}}
 einbinden codingshare 100.97.97.130 codingshare codingmachine "$HOME/Development/codingshare" "" \
     100.97.97.130 192.168.1.132
-einbinden graphics 192.168.1.25 graphics henneberg "$HOME/graphics" "" \
-    192.168.1.25
+einbinden graphics 100.97.12.20 graphics henneberg "$HOME/graphics" "" \
+    100.97.12.20 192.168.1.25
 {{- else -}}
 # Codingmachine: codingshare ist hier der Originalordner, graphics nur lesend.
-einbinden graphics 192.168.1.25 graphics codingmachine-ro "$HOME/graphics" ",ro"
+einbinden graphics 100.97.12.20 graphics codingmachine-ro "$HOME/graphics" ",ro"
 {{- end }}
 
 [ "$GEAENDERT" = 1 ] || exit 0
