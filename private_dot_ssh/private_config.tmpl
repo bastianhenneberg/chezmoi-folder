@@ -157,6 +157,18 @@ Host coolify
     IdentityFile ~/.ssh/infra-monitor
     IdentitiesOnly yes
 
+# nbg1-proxy — Nginx Proxy Manager im Container npm-app-1, Admin auf Port 81.
+# Es laeuft KEIN nginx auf dem Host; die Proxy-Hosts liegen im Container unter
+# /data/nginx/proxy_host/. Fuer docker-Abfragen braucht infra-monitor deshalb
+# Temp-Root (infra-monitor-privilege-control enable <ttl> <grund>).
+# Der Eintrag "Host 167.235.140.33" weiter oben zeigt auf root/arch-linux-mobile
+# und bleibt bestehen — er wird nicht ersetzt, nur ergaenzt.
+Host ubuntu-4gb-nbg1-1-proxy nbg1-proxy
+    HostName 167.235.140.33
+    User infra-monitor
+    IdentityFile ~/.ssh/infra-monitor
+    IdentitiesOnly yes
+
 Host mail-machine 2.28.109.241
     HostName 2.28.109.241
     User infra-monitor
