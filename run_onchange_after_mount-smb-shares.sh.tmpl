@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Bindet unsere SMB-Freigaben fest ein — als normale Ordner, nicht ueber gvfs.
+#
+#   codingshare (Codingmachine) -> ~/Development/codingshare   Laptop/Desktop, lesen+schreiben
+#   graphics    (Grafikserver)  -> ~/graphics                  Laptop/Desktop lesen+schreiben,
+#                                                              Codingmachine NUR LESEN
+#
+# Warum nicht einfach Nautilus/gvfs: gvfs gibt anderen Programmen nur dann einen
+# echten Pfad, wenn gvfsd-fuse laeuft. Tut es das nicht, bekommt z.B. nvim beim
+# "Oeffnen mit" eine smb://-Adresse und kann nichts damit anfangen (19.10.2026).
+#
+# x-systemd.automount: eingebunden wird erst beim ersten Zugriff. Ist der Server
+# nicht erreichbar (Grafikserver: nur im Buero-LAN), bootet der Rechner trotzdem
+# (nofail), und ein Zugriff gibt nach 10 s auf statt zu haengen.
+#
+# Codingmachine und graphics: dort laufen Agents mit sudo. Deshalb ein eigener
+# TrueNAS-Benutzer codingmachine-ro, den der Server selbst auf Lesen beschraenkt
+# ("read list" an der Freigabe, "invalid users" an all/secure), und zusaetzlich
+# ein ro-Mount. Passwort: AI Brain, Credential "TrueNAS graphics SMB codingmachine-ro".
+# Die Freigaben "all" und "secure" werden bewusst NICHT eingebunden.
+#
+# Passwoerter stehen NICHT in diesem Repo: sie kommen aus dem Schluesselbund
+# (Nautilus hat sie dort abgelegt) oder werden einmal abgefragt und landen in
+# /etc/samba/credentials/<name> (root, 600).
+# Braucht sudo. Idempotent: ist der fstab-Eintrag schon da, passiert nichts.
+set -euo pipefail
+
+if ! command -v mount.cifs >/dev/null 2>&1; then
+    echo "[smb] cifs-utils fehlt — bitte installieren und chezmoi apply erneut ausfuehren."
+    exit 0
+fi
+
+GEAENDERT=0
+
+# einbinden NAME SERVER SHARE SMB_USER MOUNTPUNKT EXTRA_OPTS [KEYRING_SERVER...]
+einbinden() {
+    local name=$1 server=$2 share=$3 smb_user=$4 mountpunkt=$5 extra=$6
+    shift 6
+    local creds=/etc/samba/credentials/$name
+    local quelle="//$server/$share"
+
+    if grep -qsE "^[^#]*[[:space:]]$mountpunkt[[:space:]]+cifs" /etc/fstab; then
+        echo "[smb] $name: fstab-Eintrag vorhanden — nichts zu tun."
+        return 0
+    fi
+
+    mkdir -p "$mountpunkt"
+    if [ -n "$(ls -A "$mountpunkt" 2>/dev/null)" ]; then
+        echo "[smb] $name: $mountpunkt ist nicht leer — uebersprungen, bitte erst pruefen."
+        return 0
+    fi
+
+    if ! sudo test -f "$creds"; then
+        # Nach Attributen suchen, nicht nach dem Label — "search label ..." findet
+        # nichts und lieferte am 19.10.2026 ein leeres Passwort (STATUS_LOGON_FAILURE).
+        local pass="" ks
+        for ks in "$@"; do
+            pass=$(secret-tool lookup protocol smb server "$ks" user "$smb_user" 2>/dev/null || true)
+            [ -n "$pass" ] && break
+        done
+        if [ -z "$pass" ]; then
+            read -rsp "[smb] Passwort fuer $smb_user@$server ($share): " pass
+            echo
+        fi
+        sudo install -d -m 700 /etc/samba/credentials
+        printf 'username=%s\npassword=%s\n' "$smb_user" "$pass" \
+            | sudo install -m 600 /dev/stdin "$creds"
+    fi
+
+    local opts="credentials=$creds,uid=$(id -u),gid=$(id -g),file_mode=0644,dir_mode=0755,vers=3.1.1"
+    opts="$opts,_netdev,nofail,noauto,x-systemd.automount,x-systemd.idle-timeout=600"
+    opts="$opts,x-systemd.mount-timeout=10,x-systemd.requires=network-online.target$extra"
+
+    echo "[smb] $name: trage $quelle -> $mountpunkt in /etc/fstab ein ..."
+    printf '\n# %s (chezmoi: run_onchange_after_mount-smb-shares.sh)\n%s %s cifs %s 0 0\n' \
+        "$name" "$quelle" "$mountpunkt" "$opts" | sudo tee -a /etc/fstab >/dev/null
+    GEAENDERT=1
+}
+
+{{ if ne .machine "omarchy" -}}
+einbinden codingshare 100.97.97.130 codingshare codingmachine "$HOME/Development/codingshare" "" \
+    100.97.97.130 192.168.1.132
+einbinden graphics 192.168.1.25 graphics henneberg "$HOME/graphics" "" \
+    192.168.1.25
+{{- else -}}
+# Codingmachine: codingshare ist hier der Originalordner, graphics nur lesend.
+einbinden graphics 192.168.1.25 graphics codingmachine-ro "$HOME/graphics" ",ro"
+{{- end }}
+
+[ "$GEAENDERT" = 1 ] || exit 0
+
+sudo systemctl daemon-reload
+FEHLER=0
+while read -r mp; do
+    unit=$(systemd-escape --path --suffix=automount "$mp")
+    sudo systemctl reset-failed "$unit" "${unit%.automount}.mount" 2>/dev/null || true
+    sudo systemctl restart "$unit"
+    if ls "$mp" >/dev/null 2>&1 && findmnt -n -t cifs "$mp" >/dev/null; then
+        echo "[smb] Eingebunden: $mp"
+    else
+        echo "[smb] $mp nicht eingebunden (Server erreichbar? Passwort richtig?)"
+        echo "      journalctl -b | grep -i cifs — falsches Passwort: Credentials-Datei loeschen und erneut."
+        FEHLER=1
+    fi
+done < <(awk '$3 == "cifs" && $4 ~ /x-systemd.automount/ && $0 ~ /^[^#]/ {print $2}' /etc/fstab)
+exit "$FEHLER"
