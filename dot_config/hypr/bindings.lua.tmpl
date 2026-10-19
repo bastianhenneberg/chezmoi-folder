@@ -76,6 +76,12 @@ o.bind(
   "File explorer (yazi)",
   "uwsm app -- ghostty --working-directory=$(omarchy-cmd-terminal-cwd) -e yazi"
 )
+-- superfile als Alternative daneben (19.10.2026), gleiches Muster wie yazi.
+o.bind(
+  "SUPER + ALT + E",
+  "File explorer (superfile)",
+  "uwsm app -- ghostty --working-directory=$(omarchy-cmd-terminal-cwd) -e spf"
+)
 
 -- ---------------------------------------------------------------------------
 -- qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen

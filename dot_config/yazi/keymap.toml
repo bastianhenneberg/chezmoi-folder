@@ -7,4 +7,6 @@ prepend_keymap = [
   { on = "!", run = 'shell "$SHELL" --block', desc = "Open shell here" },
   # Copy absolute path(s) of selected/hovered file(s) to the Wayland clipboard
   { on = "<C-y>", run = 'shell -- printf "%s\n" "$@" | wl-copy', desc = "Copy path(s) to clipboard" },
+  # SMB-Share der Codingmachine — ueberall derselbe Pfad (Laptop/Desktop: CIFS-Automount)
+  { on = [ "g", "s" ], run = "cd ~/Development/codingshare", desc = "Go to codingshare" },
 ]

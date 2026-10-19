@@ -18,10 +18,14 @@ PAKETE=(
     age
     # Terminal + Werkzeuge aus Keybinds und Skripten
     ghostty tmux jq xdotool github-cli
+    # Dateimanager: yazi (SUPER+SHIFT+E) ueberall, superfile (SUPER+ALT+E) als
+    # Alternative. Dazu, was yazi fuer Vorschau und Suche aufruft (Archive, PDF,
+    # SVG, Video-Thumbnails, fd/rg/fzf/zoxide-Sprung).
+    yazi superfile 7zip poppler resvg ffmpeg imagemagick fd ripgrep fzf wl-clipboard
 {{- if ne .machine "omarchy" }}
-    # Dateimanager, Editor, FTP und VNC nur an den Arbeitsplaetzen, nicht auf
+    # Editor, FTP und VNC nur an den Arbeitsplaetzen, nicht auf
     # codingmachine (omarchy), die nur Agents laufen laesst
-    yazi emacs-wayland filezilla tigervnc
+    emacs-wayland filezilla tigervnc
 {{- end }}
     # Schriften: kitty und Ghostty nutzen Victor Mono
     ttf-victor-mono ttf-victor-mono-nerd
