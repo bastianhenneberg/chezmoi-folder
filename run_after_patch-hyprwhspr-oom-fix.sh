@@ -29,7 +29,13 @@ if [ ! -x "$PATCHER" ]; then
     exit 0
 fi
 
-sudo "$PATCHER"
+AUSGABE=$(sudo "$PATCHER" 2>&1)
+echo "$AUSGABE"
+
+# Seit hyprwhspr 1.48 ist der Bug upstream behoben (siehe Patcher) — nichts zu tun.
+if grep -q "Upstream bereits behoben" <<<"$AUSGABE"; then
+    exit 0
+fi
 
 # Nur neu starten, wenn wirklich etwas gepatcht wurde — ein Neustart ohne Anlass kostet
 # eine Modell-Ladezeit und bringt nichts.

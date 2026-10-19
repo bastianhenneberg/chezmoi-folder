@@ -63,11 +63,21 @@ def repl(m):
             f'{ind}import gc as _gc; _gc.collect()\n'
             f'{ind}self._faster_whisper_model = WhisperModel(model_name, device=device, compute_type=compute_type)')
 
+# Seit 1.48 behebt hyprwhspr den Bug selbst: reinitialize() ruft self.unload() und
+# release_memory() (gc + CUDA-Cache leeren) VOR dem Neuladen auf. Dann gibt es nichts
+# mehr zu patchen - das ist kein Fehler, sondern der Normalfall (geprueft 19.10.2026).
+upstream = re.compile(r'self\.unload\(\)\s*\n\s*release_memory\(\)\s*\n\s*self\._faster_whisper_model = ')
+
 gesamt = 0
 
 for ziel in ZIELE:
     with open(ziel, encoding="utf-8") as f:
         src = f.read()
+
+    if upstream.search(src):
+        print(f"[hyprwhspr-oom-fix] Upstream bereits behoben, kein Patch noetig: {ziel}")
+        gesamt += 1
+        continue
 
     if MARKER in src:
         print(f"[hyprwhspr-oom-fix] Patch bereits aktiv: {ziel}")
