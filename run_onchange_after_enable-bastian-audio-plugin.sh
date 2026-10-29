@@ -9,3 +9,6 @@ f="$HOME/.config/omarchy/shell.json"
 grep -q '"omarchy.audio"' "$f" || exit 0
 sed -i 's/"id": *"omarchy.audio"/"id": "bastian.audio"/' "$f"
 echo "Omarchy-Leiste: omarchy.audio -> bastian.audio"
+# Das Hot-Reload der Leiste tauscht nur die Widget-ID, laedt das Plugin aber
+# nicht wirklich - erst ein Neustart der Shell zeigt das neue Panel.
+command -v omarchy >/dev/null && omarchy restart shell >/dev/null 2>&1 || true
