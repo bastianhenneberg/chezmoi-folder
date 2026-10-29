@@ -36,8 +36,8 @@ o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
 -- Workspace 2 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
 o.exec_on_start("sleep 8 && uwsm app -- ghostty --title=Ghostty-WS2")
 {{- else if eq .machine "omarchy" -}}
--- Nichts automatisch starten.
--- o.launch_on_start("my-service")
+-- Virtueller Monitor fuer Agents (imkr Computer-Use, #9074), Regel in monitors.lua.
+o.exec_on_start("hyprctl output create headless AGENT")
 {{- else -}}
 {{ fail (printf "autostart.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end }}

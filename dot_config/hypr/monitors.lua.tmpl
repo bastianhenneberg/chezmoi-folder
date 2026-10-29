@@ -59,6 +59,11 @@ hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
 -- 1.25 (vor Ort so eingestellt, Auto-Detect mit GDK_SCALE 2 war zu gross)
 hl.env("GDK_SCALE", "1")
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.25 })
+
+-- Virtueller Monitor fuer Agents (imkr Computer-Use, #9074). Angelegt im
+-- Autostart per `hyprctl output create headless AGENT`; laeuft auch, wenn der
+-- echte Monitor aus ist oder fehlt. 2560x1440 bei Skalierung 1 (Bastian, 29.10.2026).
+hl.monitor({ output = "AGENT", mode = "2560x1440@60", position = "auto-right", scale = 1 })
 {{- else -}}
 {{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
 {{- end }}
