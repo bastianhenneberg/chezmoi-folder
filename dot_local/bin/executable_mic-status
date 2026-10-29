@@ -46,7 +46,7 @@ echo
 echo "=== Bewertung ==="
 if pactl list cards | grep -E "^\s+analog-input-mic:" | grep -q "not available"; then
     echo "  Headset-Mic NICHT verfuegbar."
-    echo "  -> Klinke einmal aus- und wieder einstecken, dann 'mic-fix'."
+    echo "  -> 'mic-reset' (initialisiert den Audio-Chip neu, braucht sudo, kein Reboot)."
 else
     echo "  Headset-Mic verfuegbar. -> 'mic-fix' und danach 'mic-check' zur Kontrolle."
 fi

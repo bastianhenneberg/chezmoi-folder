@@ -1,0 +1,75 @@
+#!/bin/bash
+# Anschluesse (Ports) der analogen Laptop-Soundkarte anzeigen und umschalten.
+#
+# Kopfhoerer/Lautsprecher und Headset-/internes Mikro sind am ALC285 keine
+# eigenen Geraete, sondern Ports EINES Geraets. Das Omarchy-Audio-Panel kennt
+# nur Geraete - dieses Skript liefert ihm die Ports (siehe Plugin
+# ~/.config/omarchy/plugins/bastian.audio).
+#
+#   audio-port json                     alle Ports als JSON (fuer das Panel)
+#   audio-port set <sink|source> <port> Port aktivieren
+set -u
+
+case "${1:-}" in
+json)
+    {
+        pactl -f json list sinks
+        echo
+        pactl -f json list sources
+    } | python3 -I -c '
+import json, sys
+parts = sys.stdin.read().split("\n")
+sinks, sources = json.loads(parts[0]), json.loads(parts[1])
+labels = {
+    "analog-output-headphones": "Kopfhörer",
+    "analog-output-speaker": "Laptop-Lautsprecher",
+    "analog-input-mic": "Headset-Mikrofon",
+    "analog-input-internal-mic": "Internes Mikrofon",
+}
+out = {"devices": {}}
+for kind, nodes in (("sink", sinks), ("source", sources)):
+    for n in nodes:
+        ports = n.get("ports") or []
+        if n["name"].endswith(".monitor") or len(ports) < 2:
+            continue
+        out["devices"][n["name"]] = {
+            "kind": kind,
+            "active": n.get("active_port"),
+            "ports": [{"name": p["name"],
+                       "label": labels.get(p["name"], p["description"]),
+                       "available": p["availability"] != "not available"} for p in ports],
+        }
+print(json.dumps(out))
+'
+    ;;
+set)
+    kind=${2:-}; port=${3:-}
+    [ "$kind" = sink ] || [ "$kind" = source ] || { echo "Usage: audio-port set <sink|source> <port>" >&2; exit 1; }
+    # Geraet suchen, das diesen Port hat
+    node=$(pactl -f json list "${kind}s" | python3 -I -c '
+import json, sys
+for n in json.load(sys.stdin):
+    if any(p["name"] == sys.argv[1] for p in n.get("ports") or []):
+        print(n["name"]); break
+' "$port")
+    [ -n "$node" ] || { echo "Kein Geraet mit Port $port" >&2; exit 1; }
+    # Am ALC285 (ASUS-Laptop) sind Mikro-Port und Hardware-Gain gekoppelt -
+    # dort uebernimmt mic-fix den Wechsel in der richtigen Reihenfolge.
+    if [ "$kind" = source ] && grep -qs ALC285 /sys/class/sound/hwC*D*/chip_name; then
+        case "$port" in
+        analog-input-mic)          mic-fix --headset >/dev/null 2>&1 ;;
+        analog-input-internal-mic) mic-fix --internal >/dev/null 2>&1 ;;
+        *)                         pactl set-source-port "$node" "$port" ;;
+        esac
+    else
+        pactl "set-$kind-port" "$node" "$port"
+    fi
+    # voxtype haelt den Aufnahmestream offen - nach Mikro-Wechsel neu verbinden,
+    # aber nicht mitten im Diktat.
+    if [ "$kind" = source ] && [ "$(voxtype status 2>/dev/null)" = idle ]; then
+        systemctl --user try-restart voxtype
+    fi
+    ;;
+*)
+    echo "Usage: audio-port json | audio-port set <sink|source> <port>" >&2; exit 1 ;;
+esac

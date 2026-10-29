@@ -1,0 +1,19 @@
+#!/bin/bash
+# Headset-Mikro ohne Reboot neu erkennen lassen: Audio-Stack stoppen,
+# ALC285-Codec neu initialisieren (wie beim Boot), Stack wieder starten.
+set -u
+CODEC=$(grep -ls ALC285 /sys/class/sound/hwC*D*/chip_name | head -1 | xargs -r dirname)
+[ -n "$CODEC" ] || { echo "Kein ALC285-Codec gefunden - mic-reset ist nur fuer den ASUS-Laptop."; exit 1; }
+
+systemctl --user stop wireplumber pipewire-pulse pipewire pipewire.socket pipewire-pulse.socket
+sleep 1
+echo "Codec neu initialisieren (sudo) ..."
+echo 1 | sudo tee "$CODEC/reconfig" >/dev/null && echo "  reconfig ok" || echo "  reconfig FEHLGESCHLAGEN (Karte noch belegt?)"
+sleep 1
+systemctl --user start pipewire.socket pipewire-pulse.socket pipewire pipewire-pulse wireplumber
+sleep 2
+
+echo "Mic Jack: $(amixer -c2 cget name='Mic Jack' | grep -o 'values=.*')"
+pactl list sources | grep -E "analog-input-mic:" | sed 's/^\s*//'
+mic-fix
+systemctl --user restart voxtype
