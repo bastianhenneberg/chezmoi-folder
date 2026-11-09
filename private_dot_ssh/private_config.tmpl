@@ -370,6 +370,12 @@ Host pi-unterwegs pimarchy-on-the-road
     IdentityFile ~/.ssh/arch-linux-mobile
     IdentitiesOnly yes
 {{- else if eq .machine "desktop" -}}
+Host pimarchy-on-the-road pi-unterwegs pimarchy
+    HostName 100.97.139.120
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
+
 Host github.com
     User git
     IdentityFile ~/.ssh/arch-linux-mobile
