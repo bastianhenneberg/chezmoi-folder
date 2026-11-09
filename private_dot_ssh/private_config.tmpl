@@ -235,7 +235,7 @@ Host breezy-star-forge
 Host laptop omarchy
     HostName 100.97.56.232
     User bastian
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/imkr
 
 Host desktop
     HostName 100.97.213.113
@@ -362,6 +362,13 @@ Host *
     ControlMaster auto
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 600
+
+# Raspberry Pi 5 fuer unterwegs (XREAL), eigener Schluessel des Nutzers
+Host pi-unterwegs
+    HostName pi-unterwegs.local
+    User bastian
+    IdentityFile ~/.ssh/arch-linux-mobile
+    IdentitiesOnly yes
 {{- else if eq .machine "desktop" -}}
 Host github.com
     User git
