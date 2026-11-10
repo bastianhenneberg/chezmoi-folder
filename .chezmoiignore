@@ -15,13 +15,18 @@
 # die bash-Ergaenzungen. Die Omarchy-Rechner haben eigene Dateien dafuer.
 .config/hypr/bastian.lua
 .bash_aliases
+.local/bin/claude
+.local/bin/codex
 {{ end -}}
 
 {{ if eq .machine "pi" -}}
 # Pi (pimarchy-on-the-road): eigene Richtlinie. Er laeuft mit Raspberry Pi OS
 # + Pimarchy, nicht mit Omarchy. Pimarchy besitzt hyprland.lua/bindings.lua und
 # die bash-Grundlage; chezmoi legt nur Bastians Gewohnheiten obendrauf
-# (git, .config/hypr/bastian.lua, toggle-kb-layout.sh, .bash_aliases).
+# (git, .config/hypr/bastian.lua, toggle-kb-layout.sh, .bash_aliases,
+# ~/.local/bin/claude und codex als Links auf die mise-Installation: eine
+# Login-Shell ohne Terminal (`bash -lc`, so ruft imkr per ssh auf) liest unter
+# Raspberry Pi OS keine .bashrc und fand sie sonst nicht).
 #
 # Bewusst KEINE SSH-Schluessel und kein age-Schluessel: ein Geraet fuer
 # unterwegs braucht die Forge-/Server-Schluessel nicht (Entscheidung Bastian,
@@ -45,7 +50,15 @@
 .config/systemd
 .config/voxtype
 .config/yazi
-.local/bin
+.local/bin/agent-tunnel
+.local/bin/audio-port
+.local/bin/chromium-wrapper
+.local/bin/dictation-record
+.local/bin/dictation-switch
+.local/bin/mic-check
+.local/bin/mic-fix
+.local/bin/mic-reset
+.local/bin/mic-status
 .local/share/applications
 .config/hypr/autostart.lua
 .config/hypr/bindings.lua
