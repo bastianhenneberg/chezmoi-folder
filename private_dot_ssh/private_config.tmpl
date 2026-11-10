@@ -364,13 +364,13 @@ Host *
     ControlPersist 600
 
 # Raspberry Pi 5 fuer unterwegs (XREAL), eigener Schluessel des Nutzers
-Host pi-unterwegs pimarchy-on-the-road
+Host pimarchy-on-the-road
     HostName 100.97.139.120
     User bastian
     IdentityFile ~/.ssh/arch-linux-mobile
     IdentitiesOnly yes
 {{- else if eq .machine "desktop" -}}
-Host pimarchy-on-the-road pi-unterwegs pimarchy
+Host pimarchy-on-the-road pimarchy
     HostName 100.97.139.120
     User bastian
     IdentityFile ~/.ssh/arch-linux-mobile
