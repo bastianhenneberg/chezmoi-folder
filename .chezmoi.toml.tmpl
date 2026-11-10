@@ -12,7 +12,7 @@
   Passbolt und muss vor `chezmoi apply` dort liegen, sonst lassen sich die
   SSH-Keys nicht entschluesseln.
 */ -}}
-{{- $machine := promptChoiceOnce . "machine" "machine" (list "laptop" "desktop" "omarchy") -}}
+{{- $machine := promptChoiceOnce . "machine" "machine" (list "laptop" "desktop" "omarchy" "pi") -}}
 encryption = "age"
 
 [age]

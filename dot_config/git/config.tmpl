@@ -30,7 +30,7 @@
 [user]
 	name = Peppermint Digital
 	email = department@peppermint-digital.de
-{{- else if or (eq .machine "laptop") (eq .machine "desktop") -}}
+{{- else if or (eq .machine "laptop") (eq .machine "desktop") (eq .machine "pi") -}}
 [alias]
 	co = checkout
 	br = branch
@@ -44,5 +44,5 @@
 	email = bastian.henneberg@proton.me
 	name = Bastian Henneberg
 {{- else -}}
-{{ fail (printf "git/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "git/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy/pi)" .machine) }}
 {{- end -}}

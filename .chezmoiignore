@@ -9,3 +9,61 @@
 .local/bin/chromium-wrapper
 .local/share/applications/chromium.desktop
 {{ end -}}
+
+{{ if ne .machine "pi" -}}
+# Nur auf dem Pi (pimarchy-on-the-road): seine Tastenkuerzel auf Pimarchy und
+# die bash-Ergaenzungen. Die Omarchy-Rechner haben eigene Dateien dafuer.
+.config/hypr/bastian.lua
+.bash_aliases
+{{ end -}}
+
+{{ if eq .machine "pi" -}}
+# Pi (pimarchy-on-the-road): eigene Richtlinie. Er laeuft mit Raspberry Pi OS
+# + Pimarchy, nicht mit Omarchy. Pimarchy besitzt hyprland.lua/bindings.lua und
+# die bash-Grundlage; chezmoi legt nur Bastians Gewohnheiten obendrauf
+# (git, .config/hypr/bastian.lua, toggle-kb-layout.sh, .bash_aliases).
+#
+# Bewusst KEINE SSH-Schluessel und kein age-Schluessel: ein Geraet fuer
+# unterwegs braucht die Forge-/Server-Schluessel nicht (Entscheidung Bastian,
+# 10.11.2026). Der Pi hat seinen eigenen imkr-Schluessel und eine handgepflegte
+# ~/.ssh/config, beides bleibt unangetastet.
+.ssh
+.ssh/**
+.bashrc
+.zshrc
+.config/doom
+.config/filezilla
+.config/ghostty
+.config/herdr
+.config/hyprwhspr
+.config/kitty
+.config/lazygit
+.config/nvim
+.config/oh-my-posh
+.config/omarchy
+.config/superfile
+.config/systemd
+.config/voxtype
+.config/yazi
+.local/bin
+.local/share/applications
+.config/hypr/autostart.lua
+.config/hypr/bindings.lua
+.config/hypr/hyprland.lua
+.config/hypr/hyprsunset.conf
+.config/hypr/input.lua
+.config/hypr/looknfeel.lua
+.config/hypr/monitors.lua
+.config/hypr/xdph.conf
+.config/hypr/scripts/qtile-mode.conf
+.config/hypr/scripts/toggle-qtile-mode.sh
+.config/hypr/scripts/ws-switch.sh
+00-check-age-key.sh
+enable-bastian-audio-plugin.sh
+install-browser-agents.sh
+install-hyprwhspr-faster-whisper.sh
+install-hyprwhspr-oom-hook.sh
+install-packages.sh
+mount-smb-shares.sh
+patch-hyprwhspr-oom-fix.sh
+{{ end -}}
