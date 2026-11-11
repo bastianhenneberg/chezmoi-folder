@@ -25,6 +25,30 @@ hl.workspace_rule({ workspace = "3", monitor = "DP-1", default = true })
 for ws = 4, 10 do
   hl.workspace_rule({ workspace = tostring(ws), monitor = "DP-2" })
 end
+
+-- XREAL One Pro an HDMI-A-1, nur fuer Spiele und Filme, rechts neben den
+-- dreien. SUPER + CTRL + G schaltet sie ab und wieder an
+-- (scripts/toggle-xreal.sh); "aus" steht in $XDG_RUNTIME_DIR/xreal-off und
+-- gilt bis zur naechsten Anmeldung. Ohne Brille greift die Regel nicht.
+local xreal = "desc:Nreal XREAL One Pro"
+local xreal_off = io.open((os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/xreal-off")
+if xreal_off then
+  xreal_off:close()
+end
+hl.monitor({
+  output = xreal,
+  mode = "1920x1080@90",
+  position = "8320x0",
+  scale = 1,
+  disabled = xreal_off ~= nil,
+})
+-- World of Warcraft startet immer auf der Brille, solange sie an ist.
+hl.window_rule({
+  name = "wow-on-xreal",
+  match = { title = "^World of Warcraft$" },
+  monitor = xreal,
+  fullscreen = true,
+})
 {{- else if eq .machine "laptop" -}}
 hl.env("GDK_SCALE", "1")
 
