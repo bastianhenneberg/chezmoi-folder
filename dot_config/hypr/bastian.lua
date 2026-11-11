@@ -27,6 +27,11 @@ hl.config({
     },
 })
 
+-- XREAL One Pro: highest refresh rate, as on the laptop ("preferred" picks
+-- 90 Hz). In 16:9 that is 1920x1080@120; in 32:9 the glasses offer 3840x1080
+-- only at 60 Hz over HDMI, which flickers through the adapter chain.
+hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "auto", scale = 1 })
+
 -- Pimarchy keys that mean something else on the laptop
 hl.unbind("SUPER + W") -- Pimarchy: close window (laptop: SUPER + Q)
 hl.unbind("SUPER + J") -- Pimarchy: toggle split (laptop: SUPER + SHIFT + Z)
