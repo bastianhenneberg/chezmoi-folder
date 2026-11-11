@@ -31,6 +31,9 @@ hl.config({
 -- switches 16:9 and 32:9). 16:9: 1920x1080@120, the fastest they take.
 -- 32:9: 3840x1080@60 only (their EDID caps HDMI at 340 MHz) at scale 1.25;
 -- at scale 1 the glasses' resampling onto their 1080p panels shows as moire.
+-- 16:9 is the TV mode 1080p120 with 8 more pixels per line (119.97 Hz): the
+-- kernel sends TV modes in limited RGB range (16-235), which made colours and
+-- black look washed out; any other timing gets full range.
 -- Modelines (timings from their EDID) instead of mode names: Hyprland keeps
 -- the mode list from its start, so after a switch the new mode is not in it.
 -- The menu's "Re-detect display" re-reads the port and reloads this file.
@@ -46,7 +49,7 @@ hl.monitor({
     output = "desc:Nreal XREAL One Pro",
     mode = ultrawide
         and "modeline 297.00 3840 4016 4104 4400 1080 1084 1089 1125 +hsync +vsync"
-        or "modeline 297.00 1920 2008 2052 2200 1080 1084 1089 1125 +hsync +vsync",
+        or "modeline 298.08 1920 2008 2052 2208 1080 1084 1089 1125 +hsync +vsync",
     position = "auto",
     scale = ultrawide and 1.25 or 1,
 })
