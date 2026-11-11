@@ -76,7 +76,6 @@ pi-display-sudoers.sh
 .config/hypr/scripts/qtile-mode.conf
 .config/hypr/scripts/toggle-qtile-mode.sh
 .config/hypr/scripts/ws-switch.sh
-.config/hypr/scripts/toggle-xreal.sh
 00-check-age-key.sh
 enable-bastian-audio-plugin.sh
 install-browser-agents.sh

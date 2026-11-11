@@ -87,11 +87,6 @@ o.bind(
 -- qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen
 -- ---------------------------------------------------------------------------
 o.bind("SUPER + ALT + Q", "Toggle qtile-Mode", scripts .. "/toggle-qtile-mode.sh")
-{{- if eq .machine "desktop" }}
-
--- XREAL-Brille an HDMI-A-1 ab- und anschalten (Spiele, Filme), siehe monitors.lua
-o.bind("SUPER + CTRL + G", "Toggle XREAL glasses", scripts .. "/toggle-xreal.sh")
-{{- end }}
 
 for ws = 1, 10 do
   local key = "SUPER + code:" .. tostring(ws + 9)
