@@ -16,9 +16,9 @@
 .config/hypr/bastian.lua
 .config/hypr/scripts/pi-menu.sh
 .config/hypr/scripts/redetect-display.sh
-.config/foot/bastian.ini
-.config/foot/display.ini
-.config/foot/foot.ini
+.config/foot
+.config/foot/**
+pi-display-sudoers.sh
 .bash_aliases
 .local/bin/claude
 .local/bin/codex
