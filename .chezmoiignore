@@ -14,6 +14,7 @@
 # Nur auf dem Pi (pimarchy-on-the-road): seine Tastenkuerzel auf Pimarchy und
 # die bash-Ergaenzungen. Die Omarchy-Rechner haben eigene Dateien dafuer.
 .config/hypr/bastian.lua
+.config/hypr/scripts/pi-menu.sh
 .bash_aliases
 .local/bin/claude
 .local/bin/codex

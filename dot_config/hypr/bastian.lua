@@ -62,6 +62,7 @@ bind("SUPER + ALT + S", "Move window to scratchpad",
 
 -- Apps, on the laptop's keys
 bind("SUPER + R", "Launch apps", exec("rofi -show drun"))
+bind("SUPER + ALT + SPACE", "Main menu", exec(scripts .. "/pi-menu.sh"))
 bind("SUPER + I", "Show key bindings", exec("pimarchy-keybindings"))
 bind("SUPER + SHIFT + T", "Activity", exec("foot --app-id btop -e btop"))
 bind("SUPER + SHIFT + F", "File manager", exec("pifile"))
