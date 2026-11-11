@@ -18,3 +18,6 @@ for status in /sys/class/drm/card*-HDMI-A-1/status; do
 done
 sleep 2
 hyprctl reload >/dev/null
+# Waybar keeps the bar it built for the old output size; on 32:9 it was gone.
+sleep 1
+systemctl --user restart waybar.service
