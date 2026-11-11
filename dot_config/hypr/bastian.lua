@@ -54,6 +54,12 @@ hl.monitor({
     position = "auto",
     scale = ultrawide and 1.25 or 1,
 })
+-- Switching 16:9/32:9 makes the glasses drop off and come back; Hyprland then
+-- re-adds them with the mode chosen at the last load. Re-detect on every
+-- re-add so the rule above runs again with what they offer now.
+hl.on("monitor.added", function()
+    hl.exec_cmd(scripts .. "/redetect-display.sh")
+end)
 
 -- Pimarchy keys that mean something else on the laptop
 hl.unbind("SUPER + W") -- Pimarchy: close window (laptop: SUPER + Q)
