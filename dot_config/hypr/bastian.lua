@@ -27,10 +27,29 @@ hl.config({
     },
 })
 
--- XREAL One Pro: highest refresh rate, as on the laptop ("preferred" picks
--- 90 Hz). In 16:9 that is 1920x1080@120; in 32:9 the glasses offer 3840x1080
--- only at 60 Hz over HDMI, which flickers through the adapter chain.
-hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "auto", scale = 1 })
+-- XREAL One Pro, set by what the glasses offer right now (their own menu
+-- switches 16:9 and 32:9). 16:9: 1920x1080@120, the fastest they take.
+-- 32:9: 3840x1080@60 only (their EDID caps HDMI at 340 MHz) at scale 1.25;
+-- at scale 1 the glasses' resampling onto their 1080p panels shows as moire.
+-- Modelines (timings from their EDID) instead of mode names: Hyprland keeps
+-- the mode list from its start, so after a switch the new mode is not in it.
+-- The menu's "Re-detect display" re-reads the port and reloads this file.
+local function hdmi_modes()
+    local p = io.popen("cat /sys/class/drm/card*-HDMI-A-1/modes 2>/dev/null")
+    if not p then return "" end
+    local modes = p:read("*a") or ""
+    p:close()
+    return modes
+end
+local ultrawide = hdmi_modes():find("3840x1080", 1, true) ~= nil
+hl.monitor({
+    output = "desc:Nreal XREAL One Pro",
+    mode = ultrawide
+        and "modeline 297.00 3840 4016 4104 4400 1080 1084 1089 1125 +hsync +vsync"
+        or "modeline 297.00 1920 2008 2052 2200 1080 1084 1089 1125 +hsync +vsync",
+    position = "auto",
+    scale = ultrawide and 1.25 or 1,
+})
 
 -- Pimarchy keys that mean something else on the laptop
 hl.unbind("SUPER + W") -- Pimarchy: close window (laptop: SUPER + Q)

@@ -19,9 +19,10 @@ sure() {
 }
 
 system_menu() {
-    case "$(printf '%s\n' "Lock" "Update Pimarchy" "Reload Hyprland + Waybar" \
+    case "$(printf '%s\n' "Lock" "Re-detect display" "Update Pimarchy" "Reload Hyprland + Waybar" \
         "Log out" "Restart" "Shut down" | pick "System")" in
         "Lock") swaylock -f ;;
+        "Re-detect display") "$scripts/redetect-display.sh" ;;
         "Update Pimarchy") "$term" -e bash -lc 'pimarchy update; read -rp "Enter to close "' ;;
         "Reload Hyprland + Waybar") pimarchy reload ;;
         "Log out") sure "Log out" && loginctl terminate-session "${XDG_SESSION_ID:-}" ;;
