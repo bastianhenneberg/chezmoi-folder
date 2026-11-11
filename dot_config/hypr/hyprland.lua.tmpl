@@ -31,6 +31,15 @@ o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" }) -- DP-2, Mitte
 -- Manuell gestartete Apps
 o.window("^obsidian$", { workspace = "4" })
 o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
+
+-- WoW (Battle.net via Steam/Proton): immer Vollbild; Wine darf es nicht wieder
+-- zurücksetzen (Super+F schaltet weiterhin um). Launcher aus dem Weg auf WS 5,
+-- sonst klaut er den Fokus und WoW fällt aus dem Vollbild.
+o.window({ class = "^steam_app_2336359447$", title = "^World of Warcraft$" }, {
+  fullscreen = true,
+  suppress_event = "fullscreen maximize",
+})
+o.window({ class = "^steam_app_2336359447$", title = "^Battle\\.net$" }, { workspace = "5" })
 {{- else if eq .machine "laptop" -}}
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
 o.window("^chromium$", { monitor = "eDP-2" })
