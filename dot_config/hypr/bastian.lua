@@ -33,7 +33,7 @@ hl.config({
 -- 32:9: 3840x1080@60 only (their EDID caps HDMI at 340 MHz). The glasses
 -- resample that onto their 1080p panels, which turns 1-2 px lines into moire.
 -- Scale 1.25 helped but Waybar 0.15 draws an empty bar at that scale, so the
--- thin things get thicker instead: 3 px borders here, and redetect-display.sh
+-- thin things get thicker instead: 4 px borders here, and redetect-display.sh
 -- gives foot a bigger font.
 -- 16:9 is the TV mode 1080p60 with 8 more pixels per line (59.98 Hz): the
 -- kernel sends TV modes in limited RGB range (16-235), which made colours and
@@ -58,7 +58,7 @@ hl.monitor({
     scale = 1,
 })
 if ultrawide then
-    hl.config({ general = { border_size = 3 } })
+    hl.config({ general = { border_size = 4 } })
 end
 -- Switching 16:9/32:9 makes the glasses drop off and come back; Hyprland then
 -- re-adds them with the mode chosen at the last load. Re-detect on every
