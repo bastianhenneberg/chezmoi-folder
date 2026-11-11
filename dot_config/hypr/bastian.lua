@@ -30,8 +30,11 @@ hl.config({
 -- XREAL One Pro, set by what the glasses offer right now (their own menu
 -- switches 16:9 and 32:9). 16:9: 1920x1080@60; they take 120, but Bastian
 -- found 60 calmer (half the signal through the adapter chain, same as 32:9).
--- 32:9: 3840x1080@60 only (their EDID caps HDMI at 340 MHz) at scale 1.25;
--- at scale 1 the glasses' resampling onto their 1080p panels shows as moire.
+-- 32:9: 3840x1080@60 only (their EDID caps HDMI at 340 MHz). The glasses
+-- resample that onto their 1080p panels, which turns 1-2 px lines into moire.
+-- Scale 1.25 helped but Waybar 0.15 draws an empty bar at that scale, so the
+-- thin things get thicker instead: 3 px borders here, and redetect-display.sh
+-- gives foot a bigger font.
 -- 16:9 is the TV mode 1080p60 with 8 more pixels per line (59.98 Hz): the
 -- kernel sends TV modes in limited RGB range (16-235), which made colours and
 -- black look washed out; any other timing gets full range.
@@ -52,8 +55,11 @@ hl.monitor({
         and "modeline 297.00 3840 4016 4104 4400 1080 1084 1089 1125 +hsync +vsync"
         or "modeline 149.04 1920 2008 2052 2208 1080 1084 1089 1125 +hsync +vsync",
     position = "auto",
-    scale = ultrawide and 1.25 or 1,
+    scale = 1,
 })
+if ultrawide then
+    hl.config({ general = { border_size = 3 } })
+end
 -- Switching 16:9/32:9 makes the glasses drop off and come back; Hyprland then
 -- re-adds them with the mode chosen at the last load. Re-detect on every
 -- re-add so the rule above runs again with what they offer now.
