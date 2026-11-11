@@ -1,0 +1,17 @@
+{{ if eq .machine "pi" -}}
+#!/usr/bin/env bash
+# Pi only: lets ~/.config/hypr/scripts/redetect-display.sh make the kernel
+# re-read the HDMI port without a password. Allows exactly this one tee and
+# nothing else; installed only after visudo accepts it.
+set -eu
+rule='bastian ALL=(root) NOPASSWD: /usr/bin/tee /sys/class/drm/card1-HDMI-A-1/status'
+target=/etc/sudoers.d/91-display-detect
+if [ "$(sudo cat "$target" 2>/dev/null)" = "$rule" ]; then
+    exit 0
+fi
+tmp=$(mktemp)
+printf '%s\n' "$rule" > "$tmp"
+sudo /usr/sbin/visudo -cf "$tmp"
+sudo install -m 0440 -o root -g root "$tmp" "$target"
+rm -f "$tmp"
+{{ end -}}
