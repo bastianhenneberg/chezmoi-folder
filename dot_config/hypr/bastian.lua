@@ -111,5 +111,9 @@ bind("SUPER + ESCAPE", "Lock screen", exec("swaylock -f"))
 
 -- imkr: the work runs on the codingmachine, the Pi only shows it.
 -- SUPER + ALT + RETURN is Tmux on the laptop, the same slot for the same habit.
-bind("SUPER + ALT + RETURN", "imkr on codingmachine", exec("foot -e " .. imkr .. " --host codingmachine"))
-bind("SUPER + CTRL + RETURN", "imkr here", exec("foot -e " .. imkr))
+-- Plain `imkr` goes back to the session visited last, on whichever machine, and
+-- opens the session list there (sessions_on_start in the Pi's imkr config).
+-- `--host codingmachine` without -s would always go to, or start, `default`.
+-- Here on the Pi a named session, so no `default` shows up in every list.
+bind("SUPER + ALT + RETURN", "imkr: last session + session list", exec("foot -e " .. imkr))
+bind("SUPER + CTRL + RETURN", "imkr here (session pi)", exec("foot -e " .. imkr .. " -s pi"))

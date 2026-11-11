@@ -31,13 +31,13 @@ system_menu() {
     esac
 }
 
-case "$(printf '%s\n' "Apps" "Terminal" "imkr on codingmachine" "imkr here" \
+case "$(printf '%s\n' "Apps" "Terminal" "imkr (last session)" "imkr here" \
     "Browser" "Files" "Editor" "Activity" "Coding agent" "Keyboard layout" \
     "Key bindings" "System" | pick "Menu")" in
     "Apps") rofi -show drun ;;
     "Terminal") "$term" ;;
-    "imkr on codingmachine") "$term" -e "$imkr" --host codingmachine ;;
-    "imkr here") "$term" -e "$imkr" ;;
+    "imkr (last session)") "$term" -e "$imkr" ;;
+    "imkr here") "$term" -e "$imkr" -s pi ;;
     "Browser") chromium ;;
     "Files") pifile ;;
     "Editor") zed ;;
