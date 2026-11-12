@@ -30,3 +30,6 @@ source "$OMARCHY_PATH/default/bash/rc"
 
 # imkr: Tab completion for its commands, sessions and hosts
 command -v imkr >/dev/null 2>&1 && eval "$(imkr completions bash 2>/dev/null)"
+
+# Rust (rustup), where it is installed
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
