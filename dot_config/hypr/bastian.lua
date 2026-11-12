@@ -109,6 +109,11 @@ bind("SUPER + SHIFT + F", "File manager", exec("pifile"))
 bind("SUPER + SHIFT + N", "Editor", exec("zed"))
 bind("SUPER + ESCAPE", "Lock screen", exec("swaylock -f"))
 
+-- Terminal: Ghostty once it is installed (same config as the laptop), foot
+-- until then. Pimarchy's own SUPER + RETURN starts foot.
+hl.unbind("SUPER + RETURN")
+bind("SUPER + RETURN", "Terminal", exec("sh -c 'command -v ghostty >/dev/null && exec ghostty || exec foot'"))
+
 -- imkr: the work runs on the codingmachine, the Pi only shows it.
 -- SUPER + ALT + RETURN is Tmux on the laptop, the same slot for the same habit.
 -- Plain `imkr` goes back to the session visited last, on whichever machine, and
