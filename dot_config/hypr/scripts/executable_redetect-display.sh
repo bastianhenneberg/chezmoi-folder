@@ -23,6 +23,8 @@ sleep 2
 size=10
 grep -qs 3840x1080 /sys/class/drm/card*-HDMI-A-1/modes && size=12
 printf '[main]\nfont=Victor Mono:size=%s\n' "$size" > "$HOME/.config/foot/display.ini"
+mkdir -p "$HOME/.config/ghostty"
+printf 'font-size = %s\nadjust-box-thickness = 1\n' "$size" > "$HOME/.config/ghostty/display"
 
 hyprctl reload >/dev/null
 # Waybar keeps the bar it built for the old output size; on 32:9 it was gone.

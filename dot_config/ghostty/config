@@ -102,3 +102,8 @@ async-backend = epoll
 # "never" nimmt dem Programm diese Moeglichkeit. Normale Mausbedienung in TUIs
 # (Klicken in lazygit, Scrollen in htop) bleibt unveraendert erhalten.
 mouse-shift-capture = never
+
+# Per-machine overrides, last so they win. Only the Pi writes one: its
+# redetect-display.sh sets the size per XREAL mode (16:9 10, 32:9 12) and
+# thicker box lines, which thin ones turn into moire in the glasses.
+config-file = ?"~/.config/ghostty/display"

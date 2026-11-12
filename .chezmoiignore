@@ -43,7 +43,6 @@ pi-display-sudoers.sh
 .zshrc
 .config/doom
 .config/filezilla
-.config/ghostty
 .config/herdr
 .config/hyprwhspr
 .config/kitty
