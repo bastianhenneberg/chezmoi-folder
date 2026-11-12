@@ -88,6 +88,17 @@ o.bind(
 -- ---------------------------------------------------------------------------
 o.bind("SUPER + ALT + Q", "Toggle qtile-Mode", scripts .. "/toggle-qtile-mode.sh")
 
+-- ---------------------------------------------------------------------------
+-- imkr auf Omarchys Plaetzen fuer Tmux und Herdr, wie auf dem Pi
+-- ---------------------------------------------------------------------------
+-- Ohne Namen geht imkr zur zuletzt besuchten Session (auf welchem Rechner auch
+-- immer) und oeffnet die Session-Liste; mit Strg die Session dieses Rechners.
+-- Login-Shell, weil imkr in ~/.cargo/bin bzw. ~/.local/bin liegt.
+hl.unbind("SUPER + ALT + RETURN") -- war: Tmux
+hl.unbind("SUPER + CTRL + RETURN") -- war: Herdr
+o.bind("SUPER + ALT + RETURN", "imkr: last session + session list", "omarchy-launch-terminal bash -lc 'exec imkr'")
+o.bind("SUPER + CTRL + RETURN", "imkr here (session {{ .machine }})", "omarchy-launch-terminal bash -lc 'exec imkr -s {{ .machine }}'")
+
 for ws = 1, 10 do
   local key = "SUPER + code:" .. tostring(ws + 9)
   hl.unbind(key) -- war: Switch to workspace N
