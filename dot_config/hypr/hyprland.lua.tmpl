@@ -48,7 +48,7 @@ o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" })
 -- Manuell gestartete Apps
 o.window("^obsidian$", { workspace = "4" })
 o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
-{{- else if eq .machine "omarchy" -}}
+{{- else if eq .machine "codingmachine" -}}
 -- Software-Cursor für wayvnc: ein Hardware-Cursor taucht im VNC-Stream nicht
 -- auf, weil er nie ins Framebuffer gerendert wird. WLR_NO_HARDWARE_CURSORS
 -- greift dafür nicht mehr — Hyprland setzt seit 0.41 nicht mehr auf wlroots
@@ -60,5 +60,5 @@ hl.config({
   },
 })
 {{- else -}}
-{{ fail (printf "hyprland.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "hyprland.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end }}

@@ -1,4 +1,4 @@
-{{ if eq .machine "omarchy" -}}
+{{ if eq .machine "codingmachine" -}}
 # See https://git-scm.com/docs/git-config
 
 [alias]
@@ -44,5 +44,5 @@
 	email = bastian.henneberg@proton.me
 	name = Bastian Henneberg
 {{- else -}}
-{{ fail (printf "git/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy/pi)" .machine) }}
+{{ fail (printf "git/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine/pi)" .machine) }}
 {{- end -}}

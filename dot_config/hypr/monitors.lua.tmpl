@@ -66,8 +66,8 @@ hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "a
 
 hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
 hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
-{{- else if eq .machine "omarchy" -}}
--- omarchy (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), feste Skalierung
+{{- else if eq .machine "codingmachine" -}}
+-- codingmachine (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), feste Skalierung
 -- 1.25 (vor Ort so eingestellt, Auto-Detect mit GDK_SCALE 2 war zu gross)
 hl.env("GDK_SCALE", "1")
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.25 })
@@ -77,5 +77,5 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.25 })
 -- echte Monitor aus ist oder fehlt. 2560x1440 bei Skalierung 1 (Bastian, 29.10.2026).
 hl.monitor({ output = "AGENT", mode = "2560x1440@60", position = "auto-right", scale = 1 })
 {{- else -}}
-{{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end }}

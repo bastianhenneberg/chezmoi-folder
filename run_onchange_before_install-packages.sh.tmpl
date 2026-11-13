@@ -22,9 +22,9 @@ PAKETE=(
     # Alternative. Dazu, was yazi fuer Vorschau und Suche aufruft (Archive, PDF,
     # SVG, Video-Thumbnails, fd/rg/fzf/zoxide-Sprung).
     yazi superfile 7zip poppler resvg ffmpeg imagemagick fd ripgrep fzf wl-clipboard
-{{- if ne .machine "omarchy" }}
+{{- if ne .machine "codingmachine" }}
     # Editor, FTP und VNC nur an den Arbeitsplaetzen, nicht auf
-    # codingmachine (omarchy), die nur Agents laufen laesst
+    # codingmachine, die nur Agents laufen laesst
     emacs-wayland filezilla tigervnc
 {{- end }}
     # Schriften: kitty und Ghostty nutzen Victor Mono

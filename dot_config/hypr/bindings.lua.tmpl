@@ -96,7 +96,7 @@ o.bind("SUPER + ALT + Q", "Toggle qtile-Mode", scripts .. "/toggle-qtile-mode.sh
 -- imkr liegt je nach Rechner in ~/.cargo/bin oder ~/.local/bin, beides steht
 -- nicht ueberall im PATH von Hyprland. Die codingmachine heisst in chezmoi
 -- "omarchy", in imkr "codingmachine".
-{{- $here := .machine }}{{ if eq .machine "omarchy" }}{{ $here = "codingmachine" }}{{ end }}
+{{- $here := .machine }}{{ if eq .machine "codingmachine" }}{{ $here = "codingmachine" }}{{ end }}
 local imkr = "PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH exec imkr"
 hl.unbind("SUPER + ALT + RETURN") -- war: Tmux
 hl.unbind("SUPER + CTRL + RETURN") -- war: Herdr

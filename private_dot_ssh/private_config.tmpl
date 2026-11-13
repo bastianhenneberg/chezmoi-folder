@@ -1,4 +1,4 @@
-{{ if eq .machine "omarchy" -}}
+{{ if eq .machine "codingmachine" -}}
 # Globale Settings (MUSS oben stehen)
 Host *
     ServerAliveInterval 30
@@ -230,9 +230,10 @@ Host breezy-star-forge
     IdentitiesOnly yes
 
 # imkr: die anderen eigenen Rechner, per NetBird. Der Laptop heisst in
-# Der Laptop, per NetBird. Hieß bis 15.10.2026 „omarchy" wie dieser Rechner,
-# der Alias bleibt für alte Verweise stehen.
-Host laptop omarchy
+# Der Laptop, per NetBird. Hieß bis 15.10.2026 „omarchy"; der Zweitname ist am
+# 13.11.2026 entfallen — er zeigte auf den Laptop, während „omarchy" zugleich der
+# Hostname der codingmachine war. Jede Maschine hat jetzt genau einen Namen.
+Host laptop
     HostName 100.97.56.232
     User bastian
     IdentityFile ~/.ssh/imkr
@@ -486,8 +487,8 @@ Host 91.99.142.104
     User forge
     IdentityFile ~/.ssh/arch-linux-mobile
 
-# Der Laptop, per NetBird (bis 15.10.2026 „omarchy", Alias bleibt)
-Host laptop omarchy
+# Der Laptop, per NetBird (der Zweitname „omarchy" ist am 13.11.2026 entfallen)
+Host laptop
     HostName 100.97.56.232
     User bastian
     IdentityFile ~/.ssh/imkr
@@ -497,5 +498,5 @@ Host *
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 600
 {{- else -}}
-{{ fail (printf "ssh/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "ssh/config: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end -}}

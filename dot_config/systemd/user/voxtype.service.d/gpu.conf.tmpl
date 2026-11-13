@@ -14,12 +14,12 @@ Environment="VOXTYPE_VULKAN_DEVICE=nvidia"
 {{ if eq .machine "laptop" -}}
 # ASUS ROG Zephyrus G15: 0 = AMD Radeon 680M (iGPU), 1 = NVIDIA RTX 3070 Ti.
 Environment="GGML_VK_VISIBLE_DEVICES=1"
-{{- else if eq .machine "omarchy" -}}
-# omarchy: nur eine GPU (NVIDIA RTX 4070, einziger Vulkan-ICD nvidia_icd.json).
+{{- else if eq .machine "codingmachine" -}}
+# codingmachine: nur eine GPU (NVIDIA RTX 4070, einziger Vulkan-ICD nvidia_icd.json).
 # Ohne iGPU gibt es nichts auszufiltern — GGML_VK_VISIBLE_DEVICES bleibt weg.
 {{- else if eq .machine "desktop" -}}
 # Index hier noch nicht verifiziert — erst die Geraeteliste im Log pruefen,
 # dann analog zum laptop-Zweig GGML_VK_VISIBLE_DEVICES setzen.
 {{- else -}}
-{{ fail (printf "voxtype gpu.conf: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "voxtype gpu.conf: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end }}

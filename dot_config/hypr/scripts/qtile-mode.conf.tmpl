@@ -4,8 +4,8 @@
 #                          (klassisches qtile-Verhalten).
 {{ if eq .machine "desktop" -}}
 MAIN_MONITOR=DP-2
-{{ else if or (eq .machine "laptop") (eq .machine "omarchy") -}}
+{{ else if or (eq .machine "laptop") (eq .machine "codingmachine") -}}
 MAIN_MONITOR=
 {{ else -}}
-{{ fail (printf "qtile-mode: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/omarchy)" .machine) }}
+{{ fail (printf "qtile-mode: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{ end -}}
