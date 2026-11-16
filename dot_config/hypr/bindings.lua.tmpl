@@ -84,11 +84,6 @@ o.bind(
 )
 
 -- ---------------------------------------------------------------------------
--- qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen
--- ---------------------------------------------------------------------------
-o.bind("SUPER + ALT + Q", "Toggle qtile-Mode", scripts .. "/toggle-qtile-mode.sh")
-
--- ---------------------------------------------------------------------------
 -- imkr auf Omarchys Plaetzen fuer Tmux und Herdr, wie auf dem Pi
 -- ---------------------------------------------------------------------------
 -- Ohne Namen geht imkr zur zuletzt besuchten Session (auf welchem Rechner auch
@@ -103,10 +98,35 @@ hl.unbind("SUPER + CTRL + RETURN") -- war: Herdr
 o.bind("SUPER + ALT + RETURN", "imkr: last session + session list", "omarchy-launch-terminal bash -c '" .. imkr .. "'")
 o.bind("SUPER + CTRL + RETURN", "imkr here (session {{ $here }})", "omarchy-launch-terminal bash -c '" .. imkr .. " -s {{ $here }}'")
 
-for ws = 1, 10 do
-  local key = "SUPER + code:" .. tostring(ws + 9)
-  hl.unbind(key) -- war: Switch to workspace N
-  o.bind(key, "Switch to workspace " .. ws, scripts .. "/ws-switch.sh " .. ws)
+-- ---------------------------------------------------------------------------
+-- Workspaces: feste Plaetze statt Omarchys "Platz N auf dem aktuellen Monitor"
+-- ---------------------------------------------------------------------------
+-- Die Plaetze stehen in monitors.lua (workspace_keys). Ohne Tabelle bleiben
+-- Omarchys Defaults. Frueher lief das ueber ein Skript mit globalen
+-- Nummern; das passt seit den Workspaces pro Monitor (16.11.2026) nicht mehr.
+local function move_window_to(monitor_name, slot, follow)
+  return function()
+    local monitor = hl.get_monitor(monitor_name)
+    local window = hl.get_active_window()
+    if not monitor or not window then
+      return
+    end
+    local id = o.workspaces.workspace_id(monitor, slot)
+    hl.dispatch(hl.dsp.window.move({ workspace = tostring(id), follow = follow, window = "address:" .. window.address }))
+  end
+end
+
+-- Ohne Workspaces pro Monitor (aelteres Omarchy) bleiben Omarchys Defaults:
+-- SUPER+N = Workspace N, die Regeln in monitors.lua legen ihn richtig.
+for key, place in ipairs(_G.per_monitor_workspaces and _G.workspace_keys or {}) do
+  local code = "code:" .. tostring(key + 9)
+  local monitor, slot = place[1], place[2]
+  hl.unbind("SUPER + " .. code)
+  hl.unbind("SUPER + SHIFT + " .. code)
+  hl.unbind("SUPER + SHIFT + ALT + " .. code)
+  o.bind("SUPER + " .. code, "Switch to workspace " .. key, o.workspaces.focus(slot, monitor))
+  o.bind("SUPER + SHIFT + " .. code, "Move window to workspace " .. key, move_window_to(monitor, slot, true))
+  o.bind("SUPER + SHIFT + ALT + " .. code, "Move window silently to workspace " .. key, move_window_to(monitor, slot, false))
 end
 
 -- ---------------------------------------------------------------------------
@@ -142,3 +162,9 @@ hl.define_submap("vnc_passthrough", function()
   o.bind("SUPER + CTRL + ALT + P", "VNC Passthrough aus", hl.dsp.submap("reset"))
 end)
 o.bind("SUPER + CTRL + ALT + P", "VNC Passthrough ein", hl.dsp.submap("vnc_passthrough"))
+
+-- Dictation keys from before Alt + Space and Right Alt became the defaults.
+-- Remove these lines to give the keys back to applications.
+if o.dictation_installed and o.dictation_installed() then
+  o.bind_hold("F9", "Start dictation (push-to-talk)", "omarchy-dictation start", "Stop dictation (push-to-talk)", "omarchy-dictation stop")
+end

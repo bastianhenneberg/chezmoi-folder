@@ -23,31 +23,44 @@ require("default.hypr.toggles")
 -- ---------------------------------------------------------------------------
 -- NVIDIA-Envs setzt Omarchy 4 selbst (default/hypr/nvidia.lua) — hier nur noch,
 -- was darüber hinausgeht.
+
+-- Fenster auf die festen Plaetze von SUPER+N (workspace_keys in monitors.lua).
+-- Keine Hyprland-Nummern direkt: die gehoeren seit Omarchys Workspaces pro
+-- Monitor einem Monitor-Block. Ist der Block noch unbekannt, wenigstens der
+-- richtige Monitor.
+local function on_key(key)
+  local id = workspace_key_id(key)
+  if id then
+    return { workspace = tostring(id) }
+  end
+  return { monitor = workspace_keys[key][1] }
+end
+
 {{ if eq .machine "desktop" -}}
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
-o.window("^chromium$", { workspace = "1" }) -- DP-3, links
-o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" }) -- DP-2, Mitte
+o.window("^chromium$", on_key(1)) -- SUPER+1, Samsung links
+o.window({ title = "^Ghostty-WS2$" }, on_key(2)) -- SUPER+2, BenQ Mitte
 
 -- Manuell gestartete Apps
-o.window("^obsidian$", { workspace = "4" })
-o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
+o.window("^obsidian$", on_key(4))
+o.window("^org\\.mozilla\\.Thunderbird$", on_key(5))
 
 -- WoW (Battle.net via Steam/Proton): immer Vollbild; Wine darf es nicht wieder
--- zurücksetzen (Super+F schaltet weiterhin um). Launcher aus dem Weg auf WS 5,
+-- zurücksetzen (Super+F schaltet weiterhin um). Launcher aus dem Weg auf SUPER+5,
 -- sonst klaut er den Fokus und WoW fällt aus dem Vollbild.
 o.window({ class = "^steam_app_2336359447$", title = "^World of Warcraft$" }, {
   fullscreen = true,
   suppress_event = "fullscreen maximize",
 })
-o.window({ class = "^steam_app_2336359447$", title = "^Battle\\.net$" }, { workspace = "5" })
+o.window({ class = "^steam_app_2336359447$", title = "^Battle\\.net$" }, on_key(5))
 {{- else if eq .machine "laptop" -}}
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
-o.window("^chromium$", { monitor = "eDP-2" })
-o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" })
+o.window("^chromium$", on_key(1)) -- SUPER+1, Laptop-Display
+o.window({ title = "^Ghostty-WS2$" }, on_key(2)) -- SUPER+2, MateView
 
 -- Manuell gestartete Apps
-o.window("^obsidian$", { workspace = "4" })
-o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
+o.window("^obsidian$", on_key(4))
+o.window("^org\\.mozilla\\.Thunderbird$", on_key(5))
 {{- else if eq .machine "codingmachine" -}}
 -- Software-Cursor für wayvnc: ein Hardware-Cursor taucht im VNC-Stream nicht
 -- auf, weil er nie ins Framebuffer gerendert wird. WLR_NO_HARDWARE_CURSORS
