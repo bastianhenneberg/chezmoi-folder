@@ -4,52 +4,14 @@
 -- Ab Omarchy 4 ("quattro") konfiguriert Hyprland in Lua. Die alte
 -- monitors.conf wird nicht mehr gelesen.
 
--- ---------------------------------------------------------------------------
--- Feste Workspace-Plaetze fuer SUPER+1..0
--- ---------------------------------------------------------------------------
--- Seit 16.11.2026 hat Omarchy Workspaces pro Monitor
--- (/usr/share/omarchy/default/hypr/monitor-workspaces.lua): jeder Monitor
--- besitzt einen Block von zehn Hyprland-Workspaces (Block 0 = 1-10, Block 1 =
--- 11-20 ...), welcher Monitor welchen Block hat, steht in
--- ~/.local/state/omarchy/monitor-workspaces. Die Bar zeigt pro Monitor nur
--- seinen Block, nummeriert 1-10.
---
--- Wir behalten trotzdem feste Plaetze: `workspace_keys[N] = { Monitor, Platz }`
--- sagt, wohin SUPER+N springt (bindings.lua) und wo Fensterregeln landen
--- (hyprland.lua). Hartkodierte Hyprland-Nummern wie "workspace 2" gehen nicht
--- mehr - die gehoeren jetzt irgendeinem Monitor-Block. Rechner ohne Tabelle
--- bekommen Omarchys Verhalten (SUPER+N = Platz N auf dem aktuellen Monitor).
-_G.workspace_keys = nil
-
-local function workspace_blocks()
-  local state = os.getenv("XDG_STATE_HOME") or ((os.getenv("HOME") or "") .. "/.local/state")
-  local blocks = {}
-  local file = io.open(state .. "/omarchy/monitor-workspaces", "r")
-  if file then
-    for line in file:lines() do
-      local block, connector = line:match("^(%d+)\t([^\t]*)\t")
-      if block and connector ~= "" then
-        blocks[connector] = tonumber(block)
-      end
-    end
-    file:close()
-  end
-  return blocks
-end
-
--- Omarchy vor den Workspaces pro Monitor (z.B. 4.0.x) kennt o.workspaces
--- nicht. Dort gilt die alte globale Nummerierung: SUPER+N = Workspace N, die
--- workspace_rules unten legen ihn auf seinen Monitor.
-_G.per_monitor_workspaces = (o and o.workspaces) ~= nil
-
--- Hyprland-Workspace-Nummer hinter SUPER+key, nil wenn (noch) unbekannt.
-function _G.workspace_key_id(key)
-  local place = _G.workspace_keys and _G.workspace_keys[key]
-  if place and not _G.per_monitor_workspaces then
-    return key
-  end
-  local block = place and workspace_blocks()[place[1]]
-  return block and (block * 10 + place[2]) or nil
+-- Omarchy 4.5 gibt jedem Monitor einen eigenen Block von zehn Workspaces
+-- (default/hypr/monitor-workspaces.lua) und schiebt Workspaces bei jedem
+-- Reload/Monitorwechsel dorthin um. Einen Schalter dafuer gibt es nicht. Wir
+-- wollen die globalen Nummern 1-10 wie unter 4.0.x: Die Event-Handler rufen
+-- o.workspaces.reconcile zur Laufzeit auf, also reicht es, die Funktion zu
+-- leeren. Tasten: bindings.lua, Leisten-Anzeige: ~/.config/omarchy/plugins.
+if o and o.workspaces then
+  o.workspaces.reconcile = function() end
 end
 
 {{ if eq .machine "desktop" -}}
@@ -64,20 +26,15 @@ hl.monitor({ output = "DP-3", mode = "2560x1440@240", position = "0x0", scale = 
 hl.monitor({ output = "DP-2", mode = "3840x2160@60", position = "2560x0", scale = 1 })
 hl.monitor({ output = "DP-1", mode = "1920x1080@240", position = "6400x0", scale = 1 })
 
--- Feste Plaetze (siehe oben): SUPER+1 = Samsung links, SUPER+2 = BenQ Mitte,
--- SUPER+3 = ZOWIE rechts, SUPER+4..0 = weitere Plaetze auf dem BenQ.
-_G.workspace_keys = {
-  { "DP-3", 1 },
-  { "DP-2", 1 },
-  { "DP-1", 1 },
-  { "DP-2", 2 },
-  { "DP-2", 3 },
-  { "DP-2", 4 },
-  { "DP-2", 5 },
-  { "DP-2", 6 },
-  { "DP-2", 7 },
-  { "DP-2", 8 },
-}
+-- Workspace-Zuweisung (1 = links Samsung, 2/4/5+ = Mitte BenQ, 3 = rechts ZOWIE)
+hl.workspace_rule({ workspace = "1", monitor = "DP-3", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "DP-2", default = true })
+hl.workspace_rule({ workspace = "3", monitor = "DP-1", default = true })
+
+-- Alle weiteren Workspaces (4-10) ebenfalls auf dem mittleren Monitor.
+for ws = 4, 10 do
+  hl.workspace_rule({ workspace = tostring(ws), monitor = "DP-2" })
+end
 
 -- XREAL One Pro an HDMI-A-1, nur fuer Spiele und Filme, rechts neben den
 -- dreien. Wird zum Abschalten abgezogen; beim Einstecken gilt diese Regel.
@@ -101,20 +58,11 @@ hl.monitor({ output = "eDP-2", mode = "2560x1440@240", position = "0x0", scale =
 -- HDMI-Monitor Büro
 hl.monitor({ output = "HDMI-A-1", mode = "3840x2560@50", position = "2560x0", scale = 1 })
 
--- Feste Plaetze (siehe oben): SUPER+1 = Laptop-Display, SUPER+2..5 und 7..0 =
--- MateView, SUPER+6 = XREAL (DP-1, nur wenn eingesteckt).
-_G.workspace_keys = {
-  { "eDP-2", 1 },
-  { "HDMI-A-1", 1 },
-  { "HDMI-A-1", 2 },
-  { "HDMI-A-1", 3 },
-  { "HDMI-A-1", 4 },
-  { "DP-1", 1 },
-  { "HDMI-A-1", 5 },
-  { "HDMI-A-1", 6 },
-  { "HDMI-A-1", 7 },
-  { "HDMI-A-1", 8 },
-}
+-- Workspace-Zuweisung
+hl.workspace_rule({ workspace = "1", monitor = "eDP-2", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1", default = true })
+hl.workspace_rule({ workspace = "4", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
 
 -- XREAL One Pro, am NVIDIA-Port (DP-1). Nur dieser Port traegt die 297 MHz
 -- fuer Ultra-Wide; der AMD-Port trainiert den Link nur auf RBR.
@@ -125,6 +73,9 @@ _G.workspace_keys = {
 -- Ein fest verdrahteter Modus wuerde die Brille beim Umschalten auf
 -- Ultra-Wide zurueckzwingen.
 hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "auto-right", scale = 1 })
+
+hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
 {{- else if eq .machine "codingmachine" -}}
 -- codingmachine (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), feste Skalierung
 -- 1.25 (vor Ort so eingestellt, Auto-Detect mit GDK_SCALE 2 war zu gross)
@@ -138,12 +89,3 @@ hl.monitor({ output = "AGENT", mode = "2560x1440@60", position = "auto-right", s
 {{- else -}}
 {{ fail (printf "monitors.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end }}
-
--- Die festen Plaetze an ihren Monitor binden, damit ein Workspace, den eine
--- Fensterregel erst anlegt, gleich auf dem richtigen Monitor entsteht.
-for key, place in ipairs(_G.workspace_keys or {}) do
-  local id = _G.workspace_key_id(key)
-  if id then
-    hl.workspace_rule({ workspace = tostring(id), monitor = place[1] })
-  end
-end

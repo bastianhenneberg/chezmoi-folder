@@ -6,15 +6,17 @@ o.exec_on_start(
   "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
 )
 
--- Die Fenster finden ihre Plaetze ueber die Regeln in hyprland.lua
--- (workspace_keys in monitors.lua). Zum Schluss den Fokus auf SUPER+1 legen.
--- `hyprctl dispatch` nimmt Lua, also auch Omarchys o.workspaces-Aktionen.
-o.exec_on_start([[sleep 6 && hyprctl dispatch 'o.workspaces.focus(1, "DP-3")']])
+-- Workspaces vorbereiten, damit die Fenster ihre Zielplätze finden.
+-- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
+-- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
+o.exec_on_start(
+  [[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })' && hyprctl dispatch 'hl.dsp.focus({ workspace = "1" })']]
+)
 
--- SUPER+1 (Samsung, links): Chromium (über die .desktop-Datei, wie im Menü)
+-- Workspace 1 (DP-3, links): Chromium (über die .desktop-Datei, wie im Menü)
 o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
 
--- SUPER+2 (BenQ, Mitte): Ghostty
+-- Workspace 2 (DP-2, Mitte): Ghostty
 o.exec_on_start("sleep 4 && uwsm app -- ghostty --title=Ghostty-WS2")
 {{- else if eq .machine "laptop" -}}
 -- Netzlaufwerk mounten (wartet auf Netbird + Server erreichbar)
@@ -22,15 +24,16 @@ o.exec_on_start(
   "bash -c 'until ping -c1 -W1 100.97.97.130 &>/dev/null; do sleep 2; done; sleep 1; mount /mnt/netzwerk-vault'"
 )
 
--- Die Fenster finden ihre Plaetze ueber die Regeln in hyprland.lua
--- (workspace_keys in monitors.lua), die Workspaces entstehen dabei gleich auf
--- dem richtigen Monitor.
+-- Workspace auf externem Monitor erstellen.
+-- Hyprland 0.56 nimmt bei `hyprctl dispatch` nur noch Lua entgegen, deshalb
+-- hl.dsp.focus(...) statt `dispatch workspace N` (siehe scripts/ws-switch.sh).
+o.exec_on_start([[sleep 1 && hyprctl dispatch 'hl.dsp.focus({ workspace = "2" })']])
 
--- SUPER+1 (eDP-2): Chromium — über die .desktop-Datei, damit der
+-- Workspace 1 (eDP-2): Chromium — über die .desktop-Datei, damit der
 -- Wrapper (~/.local/bin/chromium-wrapper, LIBVA_DRIVER_NAME=radeonsi) greift.
 o.exec_on_start("sleep 2 && uwsm app -- chromium.desktop")
 
--- SUPER+2 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
+-- Workspace 2 (HDMI-A-1): Ghostty (ohne tmux, da wir Herd nutzen)
 o.exec_on_start("sleep 8 && uwsm app -- ghostty --title=Ghostty-WS2")
 {{- else if eq .machine "codingmachine" -}}
 -- Virtueller Monitor fuer Agents (imkr Computer-Use, #9074), Regel in monitors.lua.
