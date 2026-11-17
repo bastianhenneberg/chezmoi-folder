@@ -1,0 +1,37 @@
+#!/bin/bash
+# Zock-Modus: Spiel starten und solange es laeuft voxtype im Sparmodus fahren.
+#
+# Steam-Startoption:  zock-modus %command%
+# (fuer Battle.net zusaetzlich: XMODIFIERS=@im=none zock-modus %command%)
+#
+# Warum: voxtype haelt large-v3 sonst dauerhaft mit ~3 GB im VRAM. Mit WoW
+# (~4 GB) + Battle.net (~1 GB) ist die RTX 3080 (10 GB) dann voll, und die
+# Omarchy-Menues bekommen keine EGL-Surface mehr (gehen nicht auf).
+# --gpu-isolation laedt das Modell pro Diktat in einem Subprozess und gibt den
+# Speicher danach frei: Diktat geht weiter, nur mit kurzer Ladezeit.
+# Ausserhalb des Spiels laeuft voxtype normal (Modell bleibt geladen, schnell).
+#
+# Umgesetzt als Laufzeit-Drop-in unter /run: verschwindet spaetestens beim
+# Neustart, falls das Skript mal nicht sauber endet.
+
+dropin_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/systemd/user/voxtype.service.d"
+dropin="$dropin_dir/zock-modus.conf"
+
+sparmodus_an() {
+  mkdir -p "$dropin_dir"
+  printf '[Service]\nExecStart=\nExecStart=/usr/bin/voxtype --gpu-isolation daemon\n' >"$dropin"
+  systemctl --user daemon-reload
+  systemctl --user restart voxtype
+}
+
+sparmodus_aus() {
+  rm -f "$dropin"
+  systemctl --user daemon-reload
+  systemctl --user restart voxtype
+}
+
+[ $# -eq 0 ] && { echo "Aufruf: zock-modus <befehl...>  (Steam: zock-modus %command%)" >&2; exit 1; }
+
+sparmodus_an
+trap sparmodus_aus EXIT
+"$@"

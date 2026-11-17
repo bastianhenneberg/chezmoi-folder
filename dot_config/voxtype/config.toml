@@ -54,11 +54,7 @@ translate = false
 # Übernommen aus der alten hyprwhspr-Konfiguration.
 initial_prompt = "Transkribiere auf Deutsch mit korrekter Groß- und Kleinschreibung, Satzzeichen, Eigennamen und gängigen Fachbegriffen wie AI-Brain, Omarchy, Hyprland, chezmoi, yazi, voxtype, Peppermint."
 
-# Modell nur fuer die Transkription in einem Subprozess laden und danach den
-# Grafikspeicher wieder freigeben. Sonst haelt large-v3 dauerhaft ~3 GB VRAM,
-# und mit WoW/Steam offen bleibt fuer die Omarchy-Menues nichts uebrig
-# (EGL_BAD_ALLOC, Menues gehen nicht auf; 17.11.2026, RTX 3080 mit 10 GB).
-gpu_isolation = true
+# Grafikspeicher beim Zocken: siehe ~/.local/bin/zock-modus (Steam-Startoption).
 
 # Number of CPU threads for inference (omit for auto-detection)
 # threads = 4
