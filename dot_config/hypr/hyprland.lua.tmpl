@@ -25,20 +25,13 @@ require("default.hypr.toggles")
 -- was darüber hinausgeht.
 {{ if eq .machine "desktop" -}}
 -- ACHTUNG, seit 18.11.2026: Per-Monitor-Workspaces sind aktiv. Eine absolute
--- Nummer wie workspace = "4" zeigt jetzt auf Platz 4 in BLOCK 1, also auf dem
--- Monitor, dem Omarchy den ersten Block gegeben hat (internes Panel zuerst,
--- sonst niedrigste Hyprland-id) - nicht mehr zwangslaeufig auf DP-2.
--- Bewusst NICHT auf `monitor = ...` umgeschrieben: das wuerde die Trennung
--- aufheben und Obsidian, Thunderbird und Ghostty auf einem Workspace stapeln.
--- Beim Praxistest pruefen, auf welchem Schirm sie landen, und erst dann
--- entscheiden.
+-- Nummer wie workspace = "2" zeigt jetzt auf Platz 2 in BLOCK 1, also auf dem
+-- Monitor mit dem ersten Block - nicht mehr zwangslaeufig auf DP-2.
+-- Die Regeln fuer Obsidian und Thunderbird sind deshalb am 18.11.2026 entfallen
+-- (Freigabe Bastian). Was hier noch steht, beim Praxistest gegenlesen.
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
 o.window("^chromium$", { workspace = "1" }) -- DP-3, links
 o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" }) -- DP-2, Mitte
-
--- Manuell gestartete Apps
-o.window("^obsidian$", { workspace = "4" })
-o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
 
 -- WoW (Battle.net via Steam/Proton): immer Vollbild; Wine darf es nicht wieder
 -- zurücksetzen (Super+F schaltet weiterhin um). Launcher aus dem Weg auf WS 5,
@@ -52,10 +45,6 @@ o.window({ class = "^steam_app_2336359447$", title = "^Battle\\.net$" }, { works
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
 o.window("^chromium$", { monitor = "eDP-2" })
 o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" })
-
--- Manuell gestartete Apps
-o.window("^obsidian$", { workspace = "4" })
-o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
 {{- else if eq .machine "codingmachine" -}}
 -- Hier steht bewusst nichts mehr. Bis 18.11.2026 erzwang dieser Zweig
 -- `no_hardware_cursors = true`, weil wayvnc den Hardware-Cursor nie im Stream

@@ -144,30 +144,17 @@ o.bind("SUPER + CTRL + RETURN", "imkr here (session {{ $here }})", "omarchy-laun
 -- Bar panel). Ein erster Entwurf hat die ueberdeckt - genau der Fehler, den
 -- diese Datei vermeiden soll.
 --
--- "Monitor N" ist bewusst der Monitor mit dem N-ten WORKSPACE-BLOCK, nicht die
--- N-te Position auf dem Schreibtisch. Omarchy verteilt die Bloecke selbst
--- (internes Panel zuerst, dann Hyprland-id) und die Leiste beschriftet sie
--- 1-10 - eine zweite, eigene Nummerierung danebenzustellen hiesse, zwei
--- Wahrheiten zu haben. Hyprlands Monitor-id direkt zu nehmen waere falsch: die
--- bekommt der Schirm, der als naechstes auftaucht.
-local function monitor_of_block(n)
-  local slots = (o.workspaces and o.workspaces.slots) or 10
-  for _, m in ipairs(hl.get_monitors()) do
-    local ws = m.active_workspace
-    -- Sonder-Workspaces (scratchpad, qconsole) tragen negative ids.
-    if ws and ws.id and ws.id > 0 and math.ceil(ws.id / slots) == n then
-      return m
-    end
-  end
-end
-
+-- "Monitor N" ist der N-te Schirm VON LINKS. Die beiden naheliegenden
+-- Alternativen sind beide falsch:
+--   * Hyprlands Monitor-id: wird in der Reihenfolge vergeben, in der Monitore
+--     auftauchen. Auf desktop hiess das 1=DP-1 (rechts), 3=DP-3 (links).
+--   * Die Workspace-Blocknummer aus monitor-workspaces.lua: folgt derselben
+--     id-Ordnung, und die Leiste zeigt sie gar nicht - sie beschriftet je
+--     Monitor die Plaetze 1-10 (Workspaces.qml, slotOf()).
+-- Die Position steht nur in `hyprctl monitors -j`, nicht in der Lua-Tabelle,
+-- deshalb das Skript.
 for n = 1, 10 do
-  o.bind("CTRL + ALT + code:" .. tostring(n + 9), "Focus monitor " .. n, function()
-    local m = monitor_of_block(n)
-    if m then
-      hl.dispatch(hl.dsp.focus({ monitor = m.name }))
-    end
-  end)
+  o.bind("CTRL + ALT + code:" .. tostring(n + 9), "Focus monitor " .. n, scripts .. "/monitor-nth.sh " .. n)
 end
 
 -- Fenster auf den Nachbarmonitor. Richtungen wie ueberall bei uns: H/J/K/L.

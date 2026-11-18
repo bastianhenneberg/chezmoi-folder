@@ -72,6 +72,7 @@ pi-display-sudoers.sh
 .config/hypr/looknfeel.lua
 .config/hypr/monitors.lua
 .config/hypr/xdph.conf
+.config/hypr/scripts/monitor-nth.sh
 .config/hypr/scripts/ws-switch.sh
 00-check-age-key.sh
 enable-bastian-audio-plugin.sh

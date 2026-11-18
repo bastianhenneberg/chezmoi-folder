@@ -51,3 +51,10 @@
 # rueckweg-globale-workspaces.lua, nur ohne den qtile-Zweig.
 .config/hypr/scripts/qtile-mode.conf
 .config/hypr/scripts/toggle-qtile-mode.sh
+
+# Leisten-Klon bastian.workspaces entfallen (18.11.2026, Freigabe Bastian:
+# "leisten clon muss ja dann weg"). Er zeigte globale Workspaces 1-10, weil wir
+# das Per-Monitor-Modul abgeklemmt hatten. Das Modul laeuft jetzt, und Omarchys
+# eigenes Widget beschriftet pro Monitor die Plaetze 1-10 von sich aus
+# (shell/plugins/bar/widgets/Workspaces.qml, slotOf()).
+.config/omarchy/plugins/bastian.workspaces
