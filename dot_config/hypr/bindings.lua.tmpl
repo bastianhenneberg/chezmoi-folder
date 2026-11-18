@@ -173,8 +173,13 @@ end
 -- Fenster auf den Nachbarmonitor. Richtungen wie ueberall bei uns: H/J/K/L.
 -- Nutzt Omarchys eigenen, block-bewussten Helfer - nur auf einer Taste, die
 -- die Split-Tastatur erreicht. Omarchys Pfeil-Defaults bleiben zusaetzlich.
-for dir, key in pairs({ l = "H", d = "J", u = "K", r = "L" }) do
-  o.bind("CTRL + ALT + " .. key, "Move window to " .. dir .. " monitor", o.workspaces.move_window_to_monitor(dir))
+for _, m in ipairs({
+  { dir = "l", key = "H", name = "left" },
+  { dir = "d", key = "J", name = "down" },
+  { dir = "u", key = "K", name = "up" },
+  { dir = "r", key = "L", name = "right" },
+}) do
+  o.bind("CTRL + ALT + " .. m.key, "Move window to " .. m.name .. " monitor", o.workspaces.move_window_to_monitor(m.dir))
 end
 
 -- ---------------------------------------------------------------------------
