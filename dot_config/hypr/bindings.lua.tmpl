@@ -57,11 +57,19 @@ o.bind("SUPER + I", "Show key bindings", "omarchy-menu-keybindings")
 o.bind("SUPER + R", "Omarchy menu", { menu = "root" })
 
 -- NICHT auf Omarchys Standard zuruecksetzen. Geprueft und verworfen am
--- 18.11.2026: SUPER+SPACE ist Hardware-Vorgabe - auf der Corne liegt der
--- Sprachumschalter auf einer Doppeltaste, die genau diese Kombination sendet.
--- Wer SUPER+SPACE hier aendert, bricht eine Taste der Tastatur, nicht nur eine
--- Belegung. Deshalb bleibt auch die Folgekette: das Root-Menue zieht auf
--- SUPER+ALT+SPACE um und das Apps-Menue auf SUPER+R.
+-- 18.11.2026, aus zwei Gruenden:
+--
+-- 1. WOHER DIE TASTE KOMMT: Windows legt den Sprachumschalter von sich aus auf
+--    SUPER+SPACE und laesst das nicht aendern. Bastian hat Linux damals daran
+--    angeglichen, damit die Geste auf beiden Systemen dieselbe ist. Eine
+--    Taste, die ausserhalb unserer Konfiguration festgenagelt ist, gibt den
+--    Ton an - nicht umgekehrt.
+-- 2. HARDWARE: auf der Corne liegt der Umschalter auf einer Doppeltaste, die
+--    genau diese Kombination sendet. Wer SUPER+SPACE hier aendert, bricht eine
+--    Taste der Tastatur, nicht nur eine Belegung.
+--
+-- Deshalb kann das Root-Menue seine Standardtaste nicht bekommen und liegt auf
+-- SUPER+R; das Apps-Menue ist dafuer zurueck auf SUPER+ALT+SPACE.
 hl.unbind("SUPER + SPACE") -- war: Omarchy-Root-Menü, zieht auf SUPER + ALT + SPACE um
 o.bind("SUPER + SPACE", "Switch keyboard layout", scripts .. "/toggle-kb-layout.sh")
 
