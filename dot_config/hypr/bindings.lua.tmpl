@@ -135,22 +135,27 @@ end
 -- ---------------------------------------------------------------------------
 -- Diktat (Toggle: einmal drücken = Start, nochmal = Stop)
 -- ---------------------------------------------------------------------------
--- Seit Omarchy 4 über voxtype. Auf Rechnern, die noch hyprwhspr fahren, greift
--- automatisch der zweite Zweig. Omarchy legt bei vorhandenem voxtype zusätzlich
--- SUPER+CTRL+X und F9 (push-to-talk) auf dieselbe Funktion.
--- Seit Omarchy 4 stehen voxtype und hyprwhspr nebeneinander. Sie duerfen nicht
--- gleichzeitig laufen (gleiche Audio-Quelle, je ein large-v3 im VRAM), deshalb
--- waehlt `dictation-switch` genau eines aus - per Omarchy-Menue > Diktat.
--- Die Taste zeigt bewusst NICHT direkt auf ein Backend, sondern auf
--- `dictation-record`: das entscheidet erst beim Druck, welcher Dienst laeuft.
--- Dadurch braucht ein Backend-Wechsel keinen Hyprland-Reload.
-o.bind("SUPER + ALT + D", "Speech-to-text", "dictation-record toggle")
-
--- Omarchy legt bei vorhandenem voxtype zusaetzlich SUPER+CTRL+X (Toggle)
--- direkt auf voxtype. Der Toggle wird hier auf denselben Wrapper umgebogen,
--- sonst greift er ins Leere, sobald hyprwhspr aktiv ist.
-hl.unbind("SUPER + CTRL + X")
-o.bind("SUPER + CTRL + X", "Toggle dictation", "dictation-record toggle")
+-- Hier steht bewusst KEINE eigene Taste mehr (18.11.2026).
+--
+-- Omarchys Defaults genuegen: ALT+SPACE schaltet um, die rechte ALT ist
+-- push-to-talk. Beide laufen ueber `omarchy-dictation`, und das ist selbst
+-- backend-bewusst - es liest `omarchy-default-dictation` und ruft den Adapter
+-- `omarchy-dictation-<backend>`. Genau dafuer war unser `dictation-record`
+-- gebaut; der Grund ist entfallen, also auch die Tasten (SUPER+ALT+D und
+-- SUPER+CTRL+X). Weniger Belegung, ein Weg statt zwei.
+--
+-- ZWEI EINSCHRAENKUNGEN, falls das zurueckgedreht werden muss:
+--   1. Omarchy kennt die Adapter voxtype, superwhisper und use - NICHT
+--      hyprwhspr. Wer hyprwhspr scharf schaltet, erreicht es per Hotkey nicht
+--      mehr; dann braucht es wieder eine eigene Taste auf `dictation-record`
+--      oder einen Adapter.
+--   2. Es gibt jetzt zwei Quellen fuer "welches Backend": Omarchys
+--      ~/.config/omarchy/defaults/dictation und unser `dictation-switch`
+--      (liest systemd enable/disable). Die koennen auseinanderlaufen - am
+--      18.11.2026 sagte Omarchy `voxtype`, der Umschalter `none`.
+--
+-- `dictation-switch` und `dictation-record` bleiben als Werkzeuge bestehen:
+-- der Umschalter macht enable/disable des Dienstes, was Omarchy nicht tut.
 
 -- F9 bleibt ABSICHTLICH unbelegt - die Taste gehoert den Anwendungen.
 -- Achtung: Omarchys Migration vom 18.11.2026 schreibt einen F9-push-to-talk
