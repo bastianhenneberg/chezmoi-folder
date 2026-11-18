@@ -49,16 +49,12 @@ o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" })
 o.window("^obsidian$", { workspace = "4" })
 o.window("^org\\.mozilla\\.Thunderbird$", { workspace = "5" })
 {{- else if eq .machine "codingmachine" -}}
--- Software-Cursor für wayvnc: ein Hardware-Cursor taucht im VNC-Stream nicht
--- auf, weil er nie ins Framebuffer gerendert wird. WLR_NO_HARDWARE_CURSORS
--- greift dafür nicht mehr — Hyprland setzt seit 0.41 nicht mehr auf wlroots
--- und ignoriert die Variable. Der Default 2 ("auto") überlässt die Wahl dem
--- Treiber, deshalb hier explizit.
-hl.config({
-  cursor = {
-    no_hardware_cursors = true,
-  },
-})
+-- Hier steht bewusst nichts mehr. Bis 18.11.2026 erzwang dieser Zweig
+-- `no_hardware_cursors = true`, weil wayvnc den Hardware-Cursor nie im Stream
+-- zeigte (er wird nicht ins Framebuffer gerendert). wayvnc ist weg, und Gliff
+-- - Omarchys eigene Fernwartung ueber SSH - uebertraegt die Cursorform als
+-- eigene Nachricht, liest sie also nicht aus dem Framebuffer. Der Zweig
+-- bleibt leer bestehen, damit codingmachine nicht in den fail-Zweig laeuft.
 {{- else -}}
 {{ fail (printf "hyprland.lua: unbekannter Rechner %q — Zweig ergaenzen (laptop/desktop/codingmachine)" .machine) }}
 {{- end }}

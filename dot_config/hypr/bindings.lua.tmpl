@@ -146,22 +146,15 @@ end
 -- Dadurch braucht ein Backend-Wechsel keinen Hyprland-Reload.
 o.bind("SUPER + ALT + D", "Speech-to-text", "dictation-record toggle")
 
--- Omarchy legt bei vorhandenem voxtype zusaetzlich SUPER+CTRL+X (Toggle) und
--- F9 (push-to-talk) direkt auf voxtype. Der Toggle wird hier auf denselben
--- Wrapper umgebogen, sonst greift er ins Leere, sobald hyprwhspr aktiv ist.
--- F9 bleibt unangetastet: dessen Release-Binding laesst sich mit der
--- Lua-API nicht zuverlaessig nachbauen - push-to-talk gilt also nur fuer
--- voxtype.
+-- Omarchy legt bei vorhandenem voxtype zusaetzlich SUPER+CTRL+X (Toggle)
+-- direkt auf voxtype. Der Toggle wird hier auf denselben Wrapper umgebogen,
+-- sonst greift er ins Leere, sobald hyprwhspr aktiv ist.
 hl.unbind("SUPER + CTRL + X")
 o.bind("SUPER + CTRL + X", "Toggle dictation", "dictation-record toggle")
 
--- ---------------------------------------------------------------------------
--- TigerVNC
--- ---------------------------------------------------------------------------
-o.bind("SUPER + CTRL + ALT + O", "TigerVNC Menu", "xdotool key F8")
-
--- Passthrough-Modus: alle Tasten an VNC durchreichen
-hl.define_submap("vnc_passthrough", function()
-  o.bind("SUPER + CTRL + ALT + P", "VNC Passthrough aus", hl.dsp.submap("reset"))
-end)
-o.bind("SUPER + CTRL + ALT + P", "VNC Passthrough ein", hl.dsp.submap("vnc_passthrough"))
+-- F9 bleibt ABSICHTLICH unbelegt - die Taste gehoert den Anwendungen.
+-- Achtung: Omarchys Migration vom 18.11.2026 schreibt einen F9-push-to-talk
+-- (auf `omarchy-dictation`) selbst in ~/.config/hypr/bindings.lua. Dieses
+-- Template kennt ihn nicht, `chezmoi apply` entfernt ihn also wieder. Taucht
+-- er nach einem kuenftigen `omarchy update` erneut als Drift auf, ist das
+-- erwartet und wird genauso wieder entfernt.
