@@ -10,15 +10,14 @@ local scripts = (os.getenv("HOME") or "") .. "/.config/hypr/scripts"
 -- ---------------------------------------------------------------------------
 -- Defaults, die frei bleiben sollen (ohne Ersatzbelegung)
 -- ---------------------------------------------------------------------------
--- Nur alte Doppelbelegungen freiräumen. Neue Omarchy-4-Funktionen
--- (SUPER+SHIFT+W = Omawrite, SUPER+SHIFT+SPACE = Top-Bar) bleiben aktiv.
-hl.unbind("SUPER + W") -- war: Close window (nutze SUPER + Q)
 hl.unbind("SUPER + P") -- war: Pseudo window
 
--- ---------------------------------------------------------------------------
--- Fenster schließen
--- ---------------------------------------------------------------------------
-o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
+-- Fenster schliessen steht hier NICHT mehr (18.11.2026). Omarchy belegt es
+-- selbst doppelt - SUPER+W UND SUPER+Q, beide auf hl.dsp.window.close(). Unser
+-- o.bind auf SUPER+Q war also eine Dopplung (im laufenden Stand erschien
+-- "Close window" zweimal), und das hl.unbind auf SUPER+W nahm eine
+-- funktionierende Standardtaste weg, ohne dort etwas anderes hinzulegen.
+-- Beides raus: SUPER+Q bleibt wie gewohnt, SUPER+W kommt kostenlos zurueck.
 
 -- ---------------------------------------------------------------------------
 -- Vim-Navigation: Fokus bewegen (H/J/K/L)
@@ -46,17 +45,26 @@ o.bind("SUPER + I", "Show key bindings", "omarchy-menu-keybindings")
 -- ---------------------------------------------------------------------------
 -- Launcher & Tastaturlayout
 -- ---------------------------------------------------------------------------
--- Früher walker; Omarchy 4 hat walker/elephant entfernt und durch das eigene
--- Quickshell-Menü ersetzt.
-o.bind("SUPER + R", "Launch apps", "omarchy-menu toggle apps")
+-- Das Apps-Menue liegt auf Omarchys Standardtaste SUPER+ALT+SPACE - hier steht
+-- dafuer bewusst NICHTS mehr. Bis 18.11.2026 lag es auf SUPER+R, weil das
+-- Root-Menue SUPER+ALT+SPACE besetzt hatte; das ist jetzt umgedreht.
+--
+-- SUPER+R tragt stattdessen das ROOT-Menue. Dessen eigene Standardtasten sind
+-- nicht nutzbar: SUPER+SPACE gehoert zwingend dem Sprachumschalter (siehe
+-- unten, Hardware-Vorgabe der Corne), und die zweite,
+-- SUPER+SHIFT+code:201, ist ein Sonder-Keycode, den unsere Tastaturen nicht
+-- haben. SUPER+R ist im Standard frei, ueberdeckt also nichts.
+o.bind("SUPER + R", "Omarchy menu", { menu = "root" })
 
+-- NICHT auf Omarchys Standard zuruecksetzen. Geprueft und verworfen am
+-- 18.11.2026: SUPER+SPACE ist Hardware-Vorgabe - auf der Corne liegt der
+-- Sprachumschalter auf einer Doppeltaste, die genau diese Kombination sendet.
+-- Wer SUPER+SPACE hier aendert, bricht eine Taste der Tastatur, nicht nur eine
+-- Belegung. Deshalb bleibt auch die Folgekette: das Root-Menue zieht auf
+-- SUPER+ALT+SPACE um und das Apps-Menue auf SUPER+R.
 hl.unbind("SUPER + SPACE") -- war: Omarchy-Root-Menü, zieht auf SUPER + ALT + SPACE um
 o.bind("SUPER + SPACE", "Switch keyboard layout", scripts .. "/toggle-kb-layout.sh")
 
--- Root-Menü braucht ein neues Zuhause: SUPER + ALT + SPACE zeigte bisher das
--- Apps-Menü, das jetzt auf SUPER + R liegt — also doppelt belegt.
-hl.unbind("SUPER + ALT + SPACE") -- war: Apps menu (jetzt auf SUPER + R)
-o.bind("SUPER + ALT + SPACE", "Omarchy menu", "omarchy-menu toggle root")
 
 -- ---------------------------------------------------------------------------
 -- Anwendungen
@@ -84,11 +92,6 @@ o.bind(
 )
 
 -- ---------------------------------------------------------------------------
--- qtile-Mode: Workspace-Wechsel optional immer auf den Haupt-Monitor holen
--- ---------------------------------------------------------------------------
-o.bind("SUPER + ALT + Q", "Toggle qtile-Mode", scripts .. "/toggle-qtile-mode.sh")
-
--- ---------------------------------------------------------------------------
 -- imkr auf Omarchys Plaetzen fuer Tmux und Herdr, wie auf dem Pi
 -- ---------------------------------------------------------------------------
 -- Ohne Namen geht imkr zur zuletzt besuchten Session (auf welchem Rechner auch
@@ -103,33 +106,67 @@ hl.unbind("SUPER + CTRL + RETURN") -- war: Herdr
 o.bind("SUPER + ALT + RETURN", "imkr: last session + session list", "omarchy-launch-terminal bash -c '" .. imkr .. "'")
 o.bind("SUPER + CTRL + RETURN", "imkr here (session {{ $here }})", "omarchy-launch-terminal bash -c '" .. imkr .. " -s {{ $here }}'")
 
-for ws = 1, 10 do
-  local key = "SUPER + code:" .. tostring(ws + 9)
-  hl.unbind(key) -- war: Switch to workspace N
-  o.bind(key, "Switch to workspace " .. ws, scripts .. "/ws-switch.sh " .. ws)
+-- ---------------------------------------------------------------------------
+-- Monitore: Ziffer = welcher Schirm
+-- ---------------------------------------------------------------------------
+-- Seit Omarchy 4.5 hat JEDER Monitor eigene Workspaces 1-10
+-- (default/hypr/monitor-workspaces.lua). Omarchys Ziffern-Ebenen bleiben
+-- deshalb hier UNANGETASTET und gelten monitor-relativ:
+--
+--   SUPER + 1..0               Workspace N auf diesem Monitor
+--   SUPER + SHIFT + 1..0       Fenster auf Workspace N
+--
+-- Zwei Dinge kann Omarchy nicht, und nur die stehen hier:
+--   * einen Monitor DIREKT anspringen - es gibt nur CTRL+ALT+TAB zum Zyklen
+--   * ein Fenster auf einen anderen Monitor schieben, ohne drei Modifier und
+--     Pfeiltasten (Omarchy: SUPER+SHIFT+CTRL+Pfeil). Auf der Corne/Swoop nicht
+--     greifbar, weil dort noch der Ziffern-Layer dazukommt - Dreifach-Modifier
+--     sind hier deshalb grundsaetzlich ausgeschlossen.
+--
+-- Beides liegt auf CTRL+ALT, und zwar mit Absicht: das ist bei Omarchy schon
+-- der Monitor-Modifier (CTRL+ALT+TAB = naechster Monitor), und es ist die
+-- EINZIGE Zweier-Kombination, deren Ziffern komplett frei sind. Gemessen am
+-- 18.11.2026 trug CTRL+ALT nur DELETE und TAB.
+--
+--   CTRL + ALT + 1..0          Monitor N anspringen
+--   CTRL + ALT + H/J/K/L       Fenster auf den Monitor links/runter/rauf/rechts
+--
+-- NICHT auf SUPER+ALT oder SUPER+CTRL: dort liegen bereits Omarchy-Defaults
+-- auf den Ziffern (SUPER+ALT+1..5 = Switch to group window, SUPER+CTRL+1..9 =
+-- Bar panel). Ein erster Entwurf hat die ueberdeckt - genau der Fehler, den
+-- diese Datei vermeiden soll.
+--
+-- "Monitor N" ist bewusst der Monitor mit dem N-ten WORKSPACE-BLOCK, nicht die
+-- N-te Position auf dem Schreibtisch. Omarchy verteilt die Bloecke selbst
+-- (internes Panel zuerst, dann Hyprland-id) und die Leiste beschriftet sie
+-- 1-10 - eine zweite, eigene Nummerierung danebenzustellen hiesse, zwei
+-- Wahrheiten zu haben. Hyprlands Monitor-id direkt zu nehmen waere falsch: die
+-- bekommt der Schirm, der als naechstes auftaucht.
+local function monitor_of_block(n)
+  local slots = (o.workspaces and o.workspaces.slots) or 10
+  for _, m in ipairs(hl.get_monitors()) do
+    local ws = m.active_workspace
+    -- Sonder-Workspaces (scratchpad, qconsole) tragen negative ids.
+    if ws and ws.id and ws.id > 0 and math.ceil(ws.id / slots) == n then
+      return m
+    end
+  end
 end
 
--- Omarchy 4.5 hat Workspaces pro Monitor eingefuehrt (ohne Schalter zum
--- Abstellen). Wir bleiben bei globalen Nummern 1-10 wie unter 4.0.x: das
--- Modul ist in monitors.lua abgeklemmt, hier die alten Tasten von 4.0.6.
-for ws = 1, 10 do
-  local code = "code:" .. tostring(ws + 9)
-  hl.unbind("SUPER + SHIFT + " .. code)
-  hl.unbind("SUPER + SHIFT + ALT + " .. code)
-  o.bind("SUPER + SHIFT + " .. code, "Move window to workspace " .. ws, hl.dsp.window.move({ workspace = tostring(ws) }))
-  o.bind("SUPER + SHIFT + ALT + " .. code, "Move window silently to workspace " .. ws, hl.dsp.window.move({ workspace = tostring(ws), follow = false }))
+for n = 1, 10 do
+  o.bind("CTRL + ALT + code:" .. tostring(n + 9), "Focus monitor " .. n, function()
+    local m = monitor_of_block(n)
+    if m then
+      hl.dispatch(hl.dsp.focus({ monitor = m.name }))
+    end
+  end)
 end
-for _, key in ipairs({ "SUPER + TAB", "SUPER + SHIFT + TAB", "SUPER + CTRL + TAB", "SUPER + mouse_down", "SUPER + mouse_up",
-  "SUPER + SHIFT + ALT + LEFT", "SUPER + SHIFT + ALT + RIGHT", "SUPER + SHIFT + ALT + UP", "SUPER + SHIFT + ALT + DOWN", }) do
-  hl.unbind(key)
-end
-o.bind("SUPER + TAB", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
-o.bind("SUPER + SHIFT + TAB", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
-o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
-o.bind("SUPER + mouse_down", "Scroll active workspace forward", hl.dsp.focus({ workspace = "e+1" }))
-o.bind("SUPER + mouse_up", "Scroll active workspace backward", hl.dsp.focus({ workspace = "e-1" }))
-for dir, name in pairs({ l = "LEFT", r = "RIGHT", u = "UP", d = "DOWN" }) do
-  o.bind("SUPER + SHIFT + ALT + " .. name, "Move workspace to " .. name:lower() .. " monitor", hl.dsp.workspace.move({ monitor = dir }))
+
+-- Fenster auf den Nachbarmonitor. Richtungen wie ueberall bei uns: H/J/K/L.
+-- Nutzt Omarchys eigenen, block-bewussten Helfer - nur auf einer Taste, die
+-- die Split-Tastatur erreicht. Omarchys Pfeil-Defaults bleiben zusaetzlich.
+for dir, key in pairs({ l = "H", d = "J", u = "K", r = "L" }) do
+  o.bind("CTRL + ALT + " .. key, "Move window to " .. dir .. " monitor", o.workspaces.move_window_to_monitor(dir))
 end
 
 -- ---------------------------------------------------------------------------

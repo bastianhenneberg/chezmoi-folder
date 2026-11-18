@@ -43,3 +43,11 @@
 .local/bin/omarchy-tmux-generator
 .local/bin/omarchy-tmux-monitor
 .local/bin/omarchy-tmux-reload
+
+# qtile-Mode entfallen (18.11.2026, Freigabe Bastian): "den benutzen wir nicht
+# mehr, weil wir ja jetzt auch Scrolling-Layouts in Omarchy direkt haben".
+# Die Taste SUPER+ALT+Q ist aus bindings.lua raus; diese beiden Dateien lagen
+# nur noch herum. ws-switch.sh BLEIBT - es gehoert zum Rueckweg
+# rueckweg-globale-workspaces.lua, nur ohne den qtile-Zweig.
+.config/hypr/scripts/qtile-mode.conf
+.config/hypr/scripts/toggle-qtile-mode.sh

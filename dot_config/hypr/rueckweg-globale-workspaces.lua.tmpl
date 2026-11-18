@@ -1,0 +1,90 @@
+-- RUECKWEG: globale Workspaces 1-10 wie unter Omarchy 4.0.x
+-- ===========================================================================
+-- Diese Datei wird NICHT geladen. Sie ist der Rueckweg, falls die
+-- Per-Monitor-Workspaces von Omarchy 4.5 im Alltag nerven.
+--
+-- SO SCHALTET MAN ZURUECK - eine Zeile, als LETZTE in hyprland.lua:
+--
+--     require("hypr.rueckweg-globale-workspaces")
+--
+-- Sie muss die letzte sein: alles hier laeuft nach bindings.lua und
+-- ueberschreibt die Monitor-Ebenen von dort. Danach `hyprctl reload` und
+-- `hyprctl configerrors` pruefen. Zum Vorwaertsschalten die Zeile wieder raus.
+--
+-- WARNUNG, damit sie nicht vergessen wird: `o.workspaces.reconcile` ist eine
+-- INTERNE Funktion von default/hypr/monitor-workspaces.lua. Einen
+-- unterstuetzten Schalter fuer das Feature gibt es nicht. Wird die Funktion in
+-- einem kuenftigen Omarchy umbenannt oder anders gerufen, faellt dieser Patch
+-- STILL aus - die Tasten unten wirken weiter, aber die Workspaces werden
+-- wieder pro Monitor umsortiert. Das ist der Grund, warum wir am 18.11.2026
+-- davon weg sind. Wer hierher zurueckkehrt, sollte nach jedem
+-- `omarchy update` einmal pruefen, ob die Nummern noch global sind.
+--
+-- Der Stand vor dem Umbau liegt ausserdem im chezmoi-Git (Commit aaaa2ce und
+-- davor). Diese Datei ist die bequeme Kopie, nicht die Wahrheit - sie veraltet,
+-- sobald Omarchy seine Defaults aendert.
+-- ===========================================================================
+
+local scripts = os.getenv("HOME") .. "/.config/hypr/scripts"
+
+-- 1. Das Modul abklemmen: die Event-Handler rufen reconcile zur Laufzeit.
+if o and o.workspaces then
+  o.workspaces.reconcile = function() end
+end
+
+-- 2. Die Monitor-Ebenen von bindings.lua wieder freigeben.
+for n = 1, 10 do
+  hl.unbind("CTRL + ALT + code:" .. tostring(n + 9))
+end
+for _, key in ipairs({ "H", "J", "K", "L" }) do
+  hl.unbind("CTRL + ALT + " .. key)
+end
+
+-- 3. Die alten Tasten von 4.0.6 zurueck.
+for ws = 1, 10 do
+  local key = "SUPER + code:" .. tostring(ws + 9)
+  hl.unbind(key)
+  o.bind(key, "Switch to workspace " .. ws, scripts .. "/ws-switch.sh " .. ws)
+end
+
+for ws = 1, 10 do
+  local code = "code:" .. tostring(ws + 9)
+  hl.unbind("SUPER + SHIFT + " .. code)
+  hl.unbind("SUPER + SHIFT + ALT + " .. code)
+  o.bind("SUPER + SHIFT + " .. code, "Move window to workspace " .. ws, hl.dsp.window.move({ workspace = tostring(ws) }))
+  o.bind("SUPER + SHIFT + ALT + " .. code, "Move window silently to workspace " .. ws, hl.dsp.window.move({ workspace = tostring(ws), follow = false }))
+end
+
+for _, key in ipairs({ "SUPER + TAB", "SUPER + SHIFT + TAB", "SUPER + CTRL + TAB", "SUPER + mouse_down", "SUPER + mouse_up",
+  "SUPER + SHIFT + ALT + LEFT", "SUPER + SHIFT + ALT + RIGHT", "SUPER + SHIFT + ALT + UP", "SUPER + SHIFT + ALT + DOWN", }) do
+  hl.unbind(key)
+end
+o.bind("SUPER + TAB", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
+o.bind("SUPER + SHIFT + TAB", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
+o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
+o.bind("SUPER + mouse_down", "Scroll active workspace forward", hl.dsp.focus({ workspace = "e+1" }))
+o.bind("SUPER + mouse_up", "Scroll active workspace backward", hl.dsp.focus({ workspace = "e-1" }))
+for dir, name in pairs({ l = "LEFT", r = "RIGHT", u = "UP", d = "DOWN" }) do
+  o.bind("SUPER + SHIFT + ALT + " .. name, "Move workspace to " .. name:lower() .. " monitor", hl.dsp.workspace.move({ monitor = dir }))
+end
+
+-- 4. Die Heimat-Zuweisung je Rechner, die das Modul sonst selbst macht.
+{{ if eq .machine "desktop" -}}
+hl.workspace_rule({ workspace = "1", monitor = "DP-3", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "DP-2", default = true })
+hl.workspace_rule({ workspace = "3", monitor = "DP-1", default = true })
+for ws = 4, 10 do
+  hl.workspace_rule({ workspace = tostring(ws), monitor = "DP-2" })
+end
+{{ else if eq .machine "laptop" -}}
+hl.workspace_rule({ workspace = "1", monitor = "eDP-2", default = true })
+hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1", default = true })
+hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "4", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
+{{ else if eq .machine "codingmachine" -}}
+-- codingmachine hatte keine Pins: ein echter Monitor plus der headless AGENT.
+{{ else -}}
+{{ fail (printf "rueckweg: unbekannter Rechner %q" .machine) }}
+{{ end -}}

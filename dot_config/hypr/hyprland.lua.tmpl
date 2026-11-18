@@ -24,6 +24,14 @@ require("default.hypr.toggles")
 -- NVIDIA-Envs setzt Omarchy 4 selbst (default/hypr/nvidia.lua) — hier nur noch,
 -- was darüber hinausgeht.
 {{ if eq .machine "desktop" -}}
+-- ACHTUNG, seit 18.11.2026: Per-Monitor-Workspaces sind aktiv. Eine absolute
+-- Nummer wie workspace = "4" zeigt jetzt auf Platz 4 in BLOCK 1, also auf dem
+-- Monitor, dem Omarchy den ersten Block gegeben hat (internes Panel zuerst,
+-- sonst niedrigste Hyprland-id) - nicht mehr zwangslaeufig auf DP-2.
+-- Bewusst NICHT auf `monitor = ...` umgeschrieben: das wuerde die Trennung
+-- aufheben und Obsidian, Thunderbird und Ghostty auf einem Workspace stapeln.
+-- Beim Praxistest pruefen, auf welchem Schirm sie landen, und erst dann
+-- entscheiden.
 -- Autostart-Fenster auf ihre Plätze (siehe autostart.lua)
 o.window("^chromium$", { workspace = "1" }) -- DP-3, links
 o.window({ title = "^Ghostty-WS2$" }, { workspace = "2" }) -- DP-2, Mitte

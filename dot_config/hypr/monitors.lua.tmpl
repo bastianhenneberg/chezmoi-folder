@@ -4,15 +4,19 @@
 -- Ab Omarchy 4 ("quattro") konfiguriert Hyprland in Lua. Die alte
 -- monitors.conf wird nicht mehr gelesen.
 
--- Omarchy 4.5 gibt jedem Monitor einen eigenen Block von zehn Workspaces
--- (default/hypr/monitor-workspaces.lua) und schiebt Workspaces bei jedem
--- Reload/Monitorwechsel dorthin um. Einen Schalter dafuer gibt es nicht. Wir
--- wollen die globalen Nummern 1-10 wie unter 4.0.x: Die Event-Handler rufen
--- o.workspaces.reconcile zur Laufzeit auf, also reicht es, die Funktion zu
--- leeren. Tasten: bindings.lua, Leisten-Anzeige: ~/.config/omarchy/plugins.
-if o and o.workspaces then
-  o.workspaces.reconcile = function() end
-end
+-- Workspaces pro Monitor (Omarchy 4.5, default/hypr/monitor-workspaces.lua)
+-- sind AKTIV. Bis zum 18.11.2026 stand hier ein Affenpatch, der
+-- o.workspaces.reconcile leerte, um bei globalen Nummern 1-10 wie unter 4.0.x
+-- zu bleiben. Der ist weg, und zwar bewusst: einen unterstuetzten Schalter
+-- gibt es nicht, also haette jedes Release die interne Funktion umbenennen
+-- oder anders rufen koennen - und der Patch waere STILL ausgefallen, mit
+-- umsortierten Monitoren als Folge. Ein Affenpatch auf Fremd-Internas ist
+-- riskanter als das Feature.
+--
+-- Konsequenz hier: KEINE workspace_rule-Pins mehr. Das Modul verteilt die
+-- Bloecke selbst (internes Panel zuerst, dann Hyprland-id) und merkt sie je
+-- Monitor an Hersteller/Modell/Seriennummer, ueberlebt also Umstecken.
+-- Tasten: bindings.lua. Leisten-Anzeige: Omarchys eigenes Plugin.
 
 {{ if eq .machine "desktop" -}}
 hl.env("GDK_SCALE", "1")
@@ -25,16 +29,6 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 hl.monitor({ output = "DP-3", mode = "2560x1440@240", position = "0x0", scale = 1 })
 hl.monitor({ output = "DP-2", mode = "3840x2160@60", position = "2560x0", scale = 1 })
 hl.monitor({ output = "DP-1", mode = "1920x1080@240", position = "6400x0", scale = 1 })
-
--- Workspace-Zuweisung (1 = links Samsung, 2/4/5+ = Mitte BenQ, 3 = rechts ZOWIE)
-hl.workspace_rule({ workspace = "1", monitor = "DP-3", default = true })
-hl.workspace_rule({ workspace = "2", monitor = "DP-2", default = true })
-hl.workspace_rule({ workspace = "3", monitor = "DP-1", default = true })
-
--- Alle weiteren Workspaces (4-10) ebenfalls auf dem mittleren Monitor.
-for ws = 4, 10 do
-  hl.workspace_rule({ workspace = tostring(ws), monitor = "DP-2" })
-end
 
 -- XREAL One Pro an HDMI-A-1, nur fuer Spiele und Filme, rechts neben den
 -- dreien. Wird zum Abschalten abgezogen; beim Einstecken gilt diese Regel.
@@ -58,12 +52,6 @@ hl.monitor({ output = "eDP-2", mode = "2560x1440@240", position = "0x0", scale =
 -- HDMI-Monitor Büro
 hl.monitor({ output = "HDMI-A-1", mode = "3840x2560@50", position = "2560x0", scale = 1 })
 
--- Workspace-Zuweisung
-hl.workspace_rule({ workspace = "1", monitor = "eDP-2", default = true })
-hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1", default = true })
-hl.workspace_rule({ workspace = "4", monitor = "HDMI-A-1" })
-hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
-
 -- XREAL One Pro, am NVIDIA-Port (DP-1). Nur dieser Port traegt die 297 MHz
 -- fuer Ultra-Wide; der AMD-Port trainiert den Link nur auf RBR.
 --
@@ -73,9 +61,6 @@ hl.workspace_rule({ workspace = "5", monitor = "HDMI-A-1" })
 -- Ein fest verdrahteter Modus wuerde die Brille beim Umschalten auf
 -- Ultra-Wide zurueckzwingen.
 hl.monitor({ output = "desc:Nreal XREAL One Pro", mode = "highrr", position = "auto-right", scale = 1 })
-
-hl.workspace_rule({ workspace = "3", monitor = "HDMI-A-1" })
-hl.workspace_rule({ workspace = "6", monitor = "desc:Nreal XREAL One Pro" })
 {{- else if eq .machine "codingmachine" -}}
 -- codingmachine (Prod) — Huawei MateView (HDMI-A-1, 3840x2560@50), feste Skalierung
 -- 1.25 (vor Ort so eingestellt, Auto-Detect mit GDK_SCALE 2 war zu gross)
