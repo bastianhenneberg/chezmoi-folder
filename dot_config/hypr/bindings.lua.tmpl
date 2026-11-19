@@ -40,7 +40,11 @@ o.bind("SUPER + SHIFT + J", "Move window down", hl.dsp.window.move({ direction =
 -- Ersatz für die überschriebenen Defaults
 o.bind("SUPER + Y", "Toggle workspace layout", "omarchy-hyprland-workspace-layout-toggle")
 o.bind("SUPER + SHIFT + Z", "Toggle window split", hl.dsp.layout("togglesplit"))
-o.bind("SUPER + I", "Show key bindings", "omarchy-menu-keybindings")
+-- SUPER + I gehoert seit Omarchy 4.5 wieder Omarchy ("Switch input language").
+-- Bis 19.11.2026 lag hier zusaetzlich das Tastenkuerzel-Menue drauf; Hyprland
+-- feuerte dann beide Befehle. Das Menue hat damit keine eigene Taste mehr
+-- (Omarchys SUPER + K ist oben Fokus hoch), es bleibt ueber das Omarchy-Menue
+-- erreichbar.
 
 -- ---------------------------------------------------------------------------
 -- Launcher & Tastaturlayout
