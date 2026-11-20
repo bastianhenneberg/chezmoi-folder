@@ -2,8 +2,8 @@
 # Installiert die Pakete, auf die die Configs in diesem Repo zeigen — nur, was
 # Omarchy nicht ohnehin mitbringt (neovim, lazygit, chromium, …).
 #
-# Laeuft VOR dem Ausrollen der Dateien (run_..._before_), damit z.B. das hyprwhspr-
-# Skript sein Paket schon vorfindet. run_onchange_: erneuter Lauf nur, wenn sich
+# Laeuft VOR dem Ausrollen der Dateien (run_..._before_), damit Skripte und
+# Configs ihre Pakete schon vorfinden. run_onchange_: erneuter Lauf nur, wenn sich
 # diese Datei aendert — eine neue Zeile in der Liste reicht dafuer.
 # Idempotent: --needed ueberspringt, was schon installiert ist.
 #
@@ -29,8 +29,8 @@ PAKETE=(
 {{- end }}
     # Schriften: kitty und Ghostty nutzen Victor Mono
     ttf-victor-mono ttf-victor-mono-nerd
-    # Diktat: beides installiert, dictation-switch waehlt eines aus
-    voxtype-bin hyprwhspr wtype ydotool
+    # Diktat: voxtype (Backend-Wahl unter Omarchy Setup > Defaults > Dictation)
+    voxtype-bin wtype ydotool
 {{- if eq .machine "laptop" }}
     # ASUS Zephyrus: Luefter, GPU-Umschaltung
     asusctl supergfxctl rog-control-center

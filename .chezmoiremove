@@ -58,3 +58,12 @@
 # eigenes Widget beschriftet pro Monitor die Plaetze 1-10 von sich aus
 # (shell/plugins/bar/widgets/Workspaces.qml, slotOf()).
 .config/omarchy/plugins/bastian.workspaces
+
+# hyprwhspr entfernt (20.11.2026, Freigabe Bastian: "wir nutzen nur voxtype").
+# Paket, venv, pacman-Hook und User-Unit raeumt run_onchange_before_remove-hyprwhspr.sh
+# ab. Das eigene Diktat-Menue (omarchy-menu.jsonc) und die beiden Skripte gab es
+# nur fuers Umschalten hyprwhspr <-> voxtype; die Backend-Wahl macht jetzt
+# Omarchy unter Setup > Defaults > Dictation.
+.config/hyprwhspr
+.local/bin/dictation-switch
+.local/bin/dictation-record

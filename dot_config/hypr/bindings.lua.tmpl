@@ -184,18 +184,10 @@ end
 -- gebaut; der Grund ist entfallen, also auch die Tasten (SUPER+ALT+D und
 -- SUPER+CTRL+X). Weniger Belegung, ein Weg statt zwei.
 --
--- ZWEI EINSCHRAENKUNGEN, falls das zurueckgedreht werden muss:
---   1. Omarchy kennt die Adapter voxtype, superwhisper und use - NICHT
---      hyprwhspr. Wer hyprwhspr scharf schaltet, erreicht es per Hotkey nicht
---      mehr; dann braucht es wieder eine eigene Taste auf `dictation-record`
---      oder einen Adapter.
---   2. Es gibt jetzt zwei Quellen fuer "welches Backend": Omarchys
---      ~/.config/omarchy/defaults/dictation und unser `dictation-switch`
---      (liest systemd enable/disable). Die koennen auseinanderlaufen - am
---      18.11.2026 sagte Omarchy `voxtype`, der Umschalter `none`.
---
--- `dictation-switch` und `dictation-record` bleiben als Werkzeuge bestehen:
--- der Umschalter macht enable/disable des Dienstes, was Omarchy nicht tut.
+-- Seit 20.11.2026 ist hyprwhspr ganz entfernt, und mit ihm `dictation-switch`,
+-- `dictation-record` und das eigene Diktat-Menue. Das Backend (Voxtype oder
+-- Superwhisper) waehlt Omarchy unter Setup > Defaults > Dictation - eine
+-- Quelle statt zwei.
 
 -- F9 bleibt ABSICHTLICH unbelegt - die Taste gehoert den Anwendungen.
 -- Achtung: Omarchys Migration vom 18.11.2026 schreibt einen F9-push-to-talk

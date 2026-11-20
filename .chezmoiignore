@@ -44,7 +44,6 @@ pi-display-sudoers.sh
 .config/doom
 .config/filezilla
 .config/herdr
-.config/hyprwhspr
 .config/kitty
 .config/lazygit
 .config/nvim
@@ -57,8 +56,6 @@ pi-display-sudoers.sh
 .local/bin/agent-tunnel
 .local/bin/audio-port
 .local/bin/chromium-wrapper
-.local/bin/dictation-record
-.local/bin/dictation-switch
 .local/bin/mic-check
 .local/bin/mic-fix
 .local/bin/mic-reset
@@ -77,9 +74,7 @@ pi-display-sudoers.sh
 00-check-age-key.sh
 enable-bastian-audio-plugin.sh
 install-browser-agents.sh
-install-hyprwhspr-faster-whisper.sh
-install-hyprwhspr-oom-hook.sh
 install-packages.sh
 mount-smb-shares.sh
-patch-hyprwhspr-oom-fix.sh
+remove-hyprwhspr.sh
 {{ end -}}
