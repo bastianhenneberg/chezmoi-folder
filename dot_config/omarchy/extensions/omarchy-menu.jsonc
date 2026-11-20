@@ -26,7 +26,4 @@
 
   // Diktat: kein eigenes Menue mehr (20.11.2026). Omarchy waehlt das Backend
   // selbst unter Setup > Defaults > Dictation (Voxtype, Superwhisper).
-  // Der Eintrag oben im Menue ist nur ein Verweis dorthin - die Logik bleibt
-  // bei Omarchy.
-  "dictation": {"icon":"󰍬","label":"Diktat","target":"setup.default.dictation","aliases":["dictation","diktat","spracherkennung"],"description":"Spracherkennung: Voxtype oder Superwhisper"},
 }
